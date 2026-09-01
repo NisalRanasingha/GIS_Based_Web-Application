@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+.login-page {
+  min-height: 100dvh;
+  width: 100%;
+  display: grid;
+  place-items: stretch;
+  background: #fff;
+}
+
+.login-card {
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(430px, 0.95fr) minmax(0, 1.3fr);
+  overflow: hidden;
+  background: #fff;
+}
+
+.login-form-panel {
+  width: min(100%, 560px);
+  max-height: 100dvh;
+  justify-self: center;
+  align-self: center;
+  padding: clamp(24px, 5vh, 72px) clamp(28px, 5vw, 72px);
+}
+
+.login-heading {
+  margin-bottom: clamp(26px, 5vh, 48px);
+  text-align: center;
+}
+
+.login-heading h1 {
+  margin: 0 0 8px;
+  color: #09131b;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.login-heading p {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.login-form-panel form {
+  display: grid;
+  gap: 16px;
+}
+
+.login-form-panel label {
+  display: grid;
+  gap: 6px;
+  color: #12232d;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.login-form-panel input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #c8cdd0;
+  border-radius: 6px;
+  color: #15232b;
+  font-size: 0.72rem;
+  outline: none;
+}
+
+.login-form-panel input::placeholder {
+  color: #c9ced1;
+}
+
+.login-form-panel input:focus {
+  border-color: #3043a2;
+  box-shadow: 0 0 0 3px rgb(48 67 162 / 12%);
+}
+
+.login-form-panel a {
+  color: #1686d0;
+  text-decoration: none;
+}
+
+.login-form-panel a:hover {
+  text-decoration: underline;
+}
+
+.forgot-password {
+  justify-self: end;
+  margin-top: -10px;
+  font-size: 0.58rem;
+}
+
+.login-primary-button,
+.login-google-button {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.login-primary-button {
+  margin-top: 3px;
+  color: #fff;
+  background: #3043a2;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.login-primary-button:hover {
+  background: #25368d;
+  transform: translateY(-1px);
+}
+
+.login-google-button {
+  margin-top: 18px;
+  color: #111;
+  background: #f2f2f2;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.login-google-mark {
+  margin-right: 9px;
+  color: #4285f4;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.signup-prompt {
+  margin: 20px 0 0;
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+.login-image-panel {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.login-image-panel img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+@media (max-width: 1024px) {
+  .login-card {
+    grid-template-columns: minmax(380px, 0.9fr) minmax(0, 1fr);
+  }
+
+  .login-form-panel {
+    padding: 40px clamp(24px, 4vw, 48px);
+  }
+}
+
+@media (max-width: 700px) {
+  .login-card {
+    height: auto;
+    min-height: 100dvh;
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  .login-image-panel {
+    order: -1;
+    height: 36vh;
+    min-height: 250px;
+    max-height: 390px;
+  }
+
+  .login-form-panel {
+    width: 100%;
+    max-height: none;
+    padding: 38px clamp(22px, 7vw, 48px) 44px;
+  }
+}

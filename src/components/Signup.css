@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #09131b;
+  background: #f1f3f4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.signup-page {
+  min-height: 100dvh;
+  width: 100%;
+  display: grid;
+  place-items: stretch;
+  background: #f1f3f4;
+}
+
+.signup-card {
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(430px, 0.95fr);
+  overflow: hidden;
+  background: #fff;
+}
+
+.image-panel {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.image-panel img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+.form-panel {
+  width: min(100%, 560px);
+  max-height: 100dvh;
+  justify-self: center;
+  align-self: center;
+  padding: clamp(20px, 3vh, 48px) clamp(28px, 5vw, 72px);
+}
+
+.form-heading {
+  text-align: center;
+  margin-bottom: clamp(24px, 4vh, 38px);
+}
+
+.form-heading h1 {
+  margin: 0 0 6px;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.form-heading p {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+form,
+.name-fields {
+  display: grid;
+  gap: 15px;
+}
+
+.name-fields {
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: #12232d;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #c8cdd0;
+  border-radius: 6px;
+  color: #15232b;
+  font-size: 0.72rem;
+  outline: none;
+}
+
+input::placeholder {
+  color: #c9ced1;
+}
+
+input:focus {
+  border-color: #3043a2;
+  box-shadow: 0 0 0 3px rgb(48 67 162 / 12%);
+}
+
+button {
+  cursor: pointer;
+}
+
+.primary-button,
+.google-button {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.primary-button {
+  margin-top: 6px;
+  color: #fff;
+  background: #3043a2;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.primary-button:hover {
+  background: #25368d;
+  transform: translateY(-1px);
+}
+
+.google-button {
+  margin-top: 18px;
+  color: #111;
+  background: #f2f2f2;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.google-mark {
+  margin-right: 9px;
+  color: #4285f4;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.login-prompt {
+  margin: 20px 0 0;
+  text-align: center;
+  font-size: 0.7rem;
+}
+
+.login-prompt a {
+  color: #1686d0;
+  text-decoration: none;
+}
+
+.login-prompt a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+  .signup-card {
+    grid-template-columns: minmax(0, 1fr) minmax(380px, 0.9fr);
+  }
+
+  .form-panel {
+    padding: 40px clamp(24px, 4vw, 48px);
+  }
+}
+
+@media (max-width: 700px) {
+  .signup-card {
+    height: auto;
+    min-height: 100dvh;
+    grid-template-columns: 1fr;
+    overflow: visible;
+  }
+
+  .image-panel {
+    height: 36vh;
+    min-height: 250px;
+    max-height: 390px;
+  }
+
+  .form-panel {
+    width: 100%;
+    max-height: none;
+    padding: 38px clamp(22px, 7vw, 48px) 44px;
+  }
+}
+
+@media (max-width: 440px) {
+  .name-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .form-heading h1 {
+    font-size: 1.55rem;
+  }
+}
