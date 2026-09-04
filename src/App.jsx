@@ -25,13 +25,38 @@ const sectionPages = {
   },
 };
 
+const pagePaths = {
+  home: '/',
+  login: '/login',
+  signup: '/signup',
+  about: '/about',
+  contact: '/contact',
+  services: '/services',
+  research: '/research',
+  publications: '/publications',
+  news: '/news',
+};
+
+const pageFromPath = (pathname) => {
+  const page = Object.keys(pagePaths).find((key) => pagePaths[key] === pathname);
+  return page || 'home';
+};
+
 function App() {
-  const [page, setPage] = useState('home');
+  const [page, setPage] = useState(() => pageFromPath(window.location.pathname));
 
   const handleNavigate = (nextPage) => {
+    const nextPath = pagePaths[nextPage] || pagePaths.home;
+    window.history.pushState({}, '', nextPath);
     setPage(nextPage);
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   };
+
+  useEffect(() => {
+    const handlePopState = () => setPage(pageFromPath(window.location.pathname));
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
