@@ -1,1 +1,52 @@
 @import "tailwindcss";
+
+:root {
+  color: #123d7b;
+  background: #edf3f7;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  font-family: Inter, "Segoe UI", sans-serif;
+  background: #edf3f7;
+  color: #123d7b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.nara-responsive {
+  zoom: 0.95;
+  transform-origin: top center;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

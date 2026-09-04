@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import FISHeader from './FISHeader'
 import './Login.css'
+import FISFooter from './FISFooter'
 
 function Login({ onNavigate }) {
   const [signedIn, setSignedIn] = useState(false)
 
   return (
-    <main className="login-page">
+    <>
+      <FISHeader page="login" onNavigate={onNavigate} />
+      <main className="login-page">
       <section className="login-card" aria-label="Sign in to your account">
         <div className="login-form-panel">
           <div className="login-heading">
@@ -49,6 +53,8 @@ function Login({ onNavigate }) {
         </div>
       </section>
     </main>
+    <FISFooter/>
+    </>
   )
 }
 

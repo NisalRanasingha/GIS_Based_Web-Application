@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import FISHeader from './FISHeader'
 import './About.css'
+import FISFooter from './FISFooter'
 
 const activities = [
   'Supporting sustainable fisheries through practical research, accurate data, and responsible resource management.',
@@ -10,35 +11,9 @@ const activities = [
 ]
 
 function About({ onNavigate }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-
-  const navigate = (page) => {
-    setMenuOpen(false)
-    onNavigate(page)
-  }
-
   return (
     <div className="about-page">
-      <header className="site-header">
-        <a className="site-brand" href="#about" onClick={(event) => { event.preventDefault(); navigate('about') }}>
-          <span className="brand-mark" aria-hidden="true">FI</span>
-          <span>Fisheries Information Center</span>
-        </a>
-
-        <button className="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>
-          <span />
-          <span />
-          <span />
-        </button>
-
-        <nav className={`site-nav${menuOpen ? ' is-open' : ''}`} aria-label="Main navigation">
-          <a href="#home" onClick={(event) => { event.preventDefault(); navigate('login') }}>Home</a>
-          <a href="#resources">Resources</a>
-          <a className="is-active" href="#about" aria-current="page">About Us</a>
-          <a href="#contact">Contact</a>
-          <button className="account-button" type="button" onClick={() => navigate('login')}>Account</button>
-        </nav>
-      </header>
+      <FISHeader page="about" onNavigate={onNavigate} />
 
       <main>
         <section className="about-hero">
@@ -81,31 +56,7 @@ function About({ onNavigate }) {
         </div>
       </main>
 
-      <footer className="site-footer" id="contact">
-        <div className="page-width footer-grid">
-          <div className="footer-about">
-            <a className="site-brand footer-brand" href="#about" onClick={(event) => { event.preventDefault(); navigate('about') }}>
-              <span className="brand-mark" aria-hidden="true">FI</span>
-              <span>Fisheries Information Center</span>
-            </a>
-            <p>Reliable fisheries research, data, and advisory services to support Sri Lanka&apos;s fisheries and aquatic resources sector.</p>
-          </div>
-          <div>
-            <h3>Quick links</h3>
-            <a href="#statistics">Fisheries Landing Statistics</a>
-            <a href="#vessel">Vessel Registration Portal</a>
-            <a href="#licensing">Licensing &amp; Permits</a>
-          </div>
-          <div>
-            <h3>Contact us</h3>
-            <p>NARA, Crow Island, Mattakkuliya, Colombo 15, Sri Lanka</p>
-            <p>+94 11 252 1899</p>
-            <a href="mailto:fic@nara.ac.lk">fic@nara.ac.lk</a>
-            <a className="footer-button" href="mailto:fic@nara.ac.lk">Contact us <span aria-hidden="true">-&gt;</span></a>
-          </div>
-        </div>
-        <div className="footer-bottom"><div className="page-width"><span>© 2026 National Aquatic Resources Research and Development Agency (NARA), Sri Lanka.</span><span>Privacy Policy &nbsp; Disclaimer &nbsp; Sitemap</span></div></div>
-      </footer>
+    <FISFooter/>
     </div>
   )
 }

@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import FISHeader from './FISHeader'
 import './Signup.css'
+import FISFooter from './FISFooter'
 
 function Signup({ onNavigate }) {
   const [submitted, setSubmitted] = useState(false)
 
   return (
-    <main className="signup-page">
+    <>
+      <FISHeader page="signup" onNavigate={onNavigate} />
+      <main className="signup-page">
       <section className="signup-card" aria-label="Create your account">
         <div className="image-panel">
           <img src="/30342.jpg" alt="Fishing boat on calm blue water" />
@@ -66,6 +70,9 @@ function Signup({ onNavigate }) {
         </div>
       </section>
     </main>
+    <FISFooter/>
+  
+    </>
   )
 }
 
