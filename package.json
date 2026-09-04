@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "node \"GIS Backend/server.js\"",
+    "dev:full": "node \"GIS Backend/server.js\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
