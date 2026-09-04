@@ -4,15 +4,22 @@ import userAvatar from '../assets/user-avatar.svg';
 
 const navItems = ['Home', 'About Us', 'Services', 'Research', 'Publications', 'News & Events', 'Contact Us'];
 
+const pageByLabel = {
+  Home: 'home',
+  'About Us': 'about',
+  Services: 'services',
+  Research: 'research',
+  Publications: 'publications',
+  'News & Events': 'news',
+  'Contact Us': 'contact',
+};
+
 export default function FISHeader({ page, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const hideLoginButton = page === 'login' || page === 'signup';
 
   const isActive = (label) => {
-    if (label === 'Home' && page === 'home') return true;
-    if (label === 'About Us' && page === 'about') return true;
-    if (label === 'Contact Us' && page === 'contact') return true;
-    return false;
+    return pageByLabel[label] === page;
   };
 
   useEffect(() => {
@@ -27,9 +34,7 @@ export default function FISHeader({ page, onNavigate }) {
   }, []);
 
   const handleNav = (item) => {
-    if (item === 'Home') onNavigate('home');
-    if (item === 'Contact Us') onNavigate('contact');
-    if (item === 'About Us') onNavigate('about');
+    onNavigate(pageByLabel[item]);
     setMenuOpen(false);
   };
 

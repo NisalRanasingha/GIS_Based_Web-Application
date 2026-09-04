@@ -1,5 +1,5 @@
-import FISHeader from './FISHeader'
 import './About.css'
+import FISHeader from './FISHeader'
 import FISFooter from './FISFooter'
 
 const activities = [
@@ -13,7 +13,7 @@ const activities = [
 function About({ onNavigate }) {
   return (
     <div className="about-page">
-      <FISHeader page="about" onNavigate={onNavigate} />
+    <FISHeader page="about" onNavigate={onNavigate} />
 
       <main>
         <section className="about-hero">
@@ -56,7 +56,7 @@ function About({ onNavigate }) {
         </div>
       </main>
 
-    <FISFooter/>
+      <FISFooter onNavigate={onNavigate} />
     </div>
   )
 }

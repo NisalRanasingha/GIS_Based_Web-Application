@@ -16,7 +16,17 @@
 }
 
 * { box-sizing: border-box; }
-
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--page-bg);
+  color: var(--text);
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+img { max-width: 100%; display: block; }
+#root { min-height: 100vh; }
 .app-shell { min-height: 100vh; }
 .container {
   width: min(1400px, calc(100% - 28px));

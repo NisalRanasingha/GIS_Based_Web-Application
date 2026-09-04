@@ -8,7 +8,7 @@ const navItems = [
   'Contact Us',
 ]
 
-export default function Header({ page, onNavigate }) {
+export default function Header({ onNavigate }) {
   return (
     <header className="site-header">
       <div className="top-strip">
