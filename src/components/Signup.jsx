@@ -1,14 +1,45 @@
 import { useState } from 'react'
 import './Signup.css'
-import FISFooter from './FISFooter'
 import FISHeader from './FISHeader'
 
 function Signup({ onNavigate }) {
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setError('')
+    setSubmitted(false)
+    setIsSubmitting(true)
+
+    const formData = new FormData(event.currentTarget)
+    const payload = Object.fromEntries(formData.entries())
+
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Unable to create your account.')
+      }
+
+      setSubmitted(true)
+      event.currentTarget.reset()
+    } catch (requestError) {
+      setError(requestError.message || 'Unable to create your account.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <main className="signup-page">
-      <FISHeader page="signup" onNavigate={onNavigate} />
+      
       <section className="signup-card" aria-label="Create your account">
         <div className="image-panel">
           <img src="/30342.jpg" alt="Fishing boat on calm blue water" />
@@ -20,12 +51,7 @@ function Signup({ onNavigate }) {
             <p>Create Your Account</p>
           </div>
 
-          <form
-            onSubmit={(event) => {
-              event.preventDefault()
-              setSubmitted(true)
-            }}
-          >
+          <form onSubmit={handleSubmit}>
             <div className="name-fields">
               <label>
                 First Name
@@ -42,19 +68,21 @@ function Signup({ onNavigate }) {
             </label>
             <label>
               Contact
-              <input type="tel" name="contact" placeholder="Enter your contact" required />
+              <input type="tel" name="contact" placeholder="Enter your contact" pattern="[0-9]{10}" maxLength="10" title="Enter exactly 10 digits" required />
             </label>
             <label>
               Password
-              <input type="password" name="password" placeholder="Enter your password" required />
+              <input type="password" name="password" placeholder="Enter your password" minLength="5" pattern=".*[A-Za-z].*" title="Use at least 5 characters and one letter" required />
             </label>
             <label>
               Confirm Password
-              <input type="password" name="confirmPassword" placeholder="Re-enter the password" required />
+              <input type="password" name="confirmPassword" placeholder="Re-enter the password" minLength="5" required />
             </label>
 
+            {error && <p className="form-message error-message" role="alert">{error}</p>}
+            {submitted && <p className="form-message success-message" role="status">Account created successfully.</p>}
             <button className="primary-button" type="submit">
-              {submitted ? 'Account Created' : 'Sign Up'}
+              {isSubmitting ? 'Creating Account...' : submitted ? 'Account Created' : 'Sign Up'}
             </button>
           </form>
 
@@ -68,7 +96,7 @@ function Signup({ onNavigate }) {
           </p>
         </div>
       </section>
-      <FISFooter onNavigate={onNavigate} />
+      {/* <FISFooter onNavigate={onNavigate} /> */}
     </main>
   )
 }

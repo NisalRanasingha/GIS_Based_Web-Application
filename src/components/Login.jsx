@@ -8,7 +8,7 @@ function Login({ onNavigate }) {
 
   return (
     <main className="login-page">
-      <FISHeader page="login" onNavigate={onNavigate} />
+      {/* <FISHeader page="login" onNavigate={onNavigate} /> */}
       <section className="login-card" aria-label="Sign in to your account">
         <div className="login-form-panel">
           <div className="login-heading">
@@ -53,7 +53,7 @@ function Login({ onNavigate }) {
         
       
       </section>
-      <FISFooter onNavigate={onNavigate} />
+      {/* <FISFooter onNavigate={onNavigate} /> */}
     </main>
   )
 }

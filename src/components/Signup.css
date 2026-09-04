@@ -114,6 +114,20 @@ input:focus {
   box-shadow: 0 0 0 3px rgb(48 67 162 / 12%);
 }
 
+.form-message {
+  margin: -2px 0 0;
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.error-message {
+  color: #b42318;
+}
+
+.success-message {
+  color: #16794c;
+}
+
 button {
   cursor: pointer;
 }
