@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import FISHeader from '../components/FISHeader';
 import FISFooter from '../components/FISFooter';
+import { DEFAULT_NEWS_IMAGE, getNewsImageUrl } from '../utils/newsImage';
 
 const services = [
   {
@@ -35,14 +36,6 @@ const services = [
   },
 ];
 
-const newsItems = [
-  { day: '12', month: 'AUG', year: '2026', tag: 'Advisory', title: 'High Wave Warning Issued for Western & Southern Coastal Areas' },
-  { day: '05', month: 'AUG', year: '2026', tag: 'Research', title: '2026 Annual Tuna Stock Assessment Report Released' },
-  { day: '28', month: 'JUL', year: '2026', tag: 'Event', title: 'National Aquaculture Development Forum — Colombo, September 2026' },
-  { day: '15', month: 'JUL', year: '2026', tag: 'Policy', title: 'Revised Fisheries Act Regulations Gazetted' },
-  { day: '02', month: 'JUL', year: '2026', tag: 'Training', title: 'Capacity Building Workshop on GPS-Aided Fishing Technology' },
-];
-
 const stats = [
   { value: '2.3M', label: 'Metric Tons Annual Catch' },
   { value: '180K+', label: 'Registered Fishers' },
@@ -73,6 +66,8 @@ const heroSlides = [
 
 export default function FISHomePage({ onNavigate }) {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [newsItems, setNewsItems] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(true);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -82,10 +77,15 @@ export default function FISHomePage({ onNavigate }) {
     return () => clearInterval(intervalId);
   }, []);
 
-  const tickerText = useMemo(
-    () => 'Seasonal fishing ban extended in Northern Province waters · New aquaculture guidelines published · Fish stock assessment report 2024 now available · High wave warning for western coast',
-    [],
-  );
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/news?limit=5`)
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error('Unable to load news.')))
+      .then((result) => setNewsItems(
+        (result.news || []).sort((first, second) => new Date(second.published_at) - new Date(first.published_at)),
+      ))
+      .catch(() => setNewsItems([]))
+      .finally(() => setNewsLoading(false));
+  }, []);
 
   const currentSlide = heroSlides[activeSlide];
 
@@ -94,7 +94,7 @@ export default function FISHomePage({ onNavigate }) {
       <FISHeader page="home" onNavigate={onNavigate} />
 
       <main>
-        <section className="relative h-[calc(100vh-72px)] min-h-[620px] overflow-hidden bg-[#0a3d72]">
+        <section className="relative h-[calc(100dvh-68px)] min-h-0 w-full overflow-hidden bg-[#0a3d72] max-[375px]:h-[calc(100dvh-64px)] sm:h-[calc(100dvh-148px)]">
           {heroSlides.map((slide, index) => (
             <div
               key={slide.title}
@@ -104,24 +104,24 @@ export default function FISHomePage({ onNavigate }) {
               style={{ backgroundImage: `url('${slide.image}')` }}
             />
           ))}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#061d3d]/90 via-[#061d3d]/72 to-[#061d3d]/40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#061d3d]/90 via-[#061d3d]/55 to-[#061d3d]/88 sm:bg-gradient-to-r sm:from-[#061d3d]/90 sm:via-[#061d3d]/72 sm:to-[#061d3d]/40" />
 
-          <div className="relative mx-auto flex h-full max-w-[1440px] items-center px-4 sm:px-6 lg:px-8">
-            <div className="grid w-full items-end gap-8 lg:grid-cols-[1.5fr_0.8fr]">
-              <div className="max-w-[700px] pb-10 text-white">
-                <div className="mb-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#f4b740] sm:text-[11px]">{currentSlide.eyebrow}</div>
-                <h1 className="max-w-[620px] text-2xl font-extrabold leading-[1] tracking-[-0.05em] text-white sm:text-3xl lg:text-[3.4rem]">
+          <div className="relative mx-auto flex h-full max-w-[1440px] items-center px-4 py-8 max-[375px]:px-3 max-[375px]:pt-10 max-[375px]:pb-5 sm:px-6 sm:py-0 lg:px-8">
+            <div className="grid w-full items-center gap-7 sm:items-end sm:gap-6 lg:grid-cols-[1.5fr_0.8fr]">
+              <div className="max-w-[700px] text-white sm:pb-1 sm:pt-3">
+                <div className="mb-3 inline-flex rounded-full border border-[#f4b740]/35 bg-[#061d3d]/30 px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#f4b740] sm:mb-5 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-[11px] sm:tracking-[0.2em]">{currentSlide.eyebrow}</div>
+                <h1 className="max-w-[620px] text-[2.35rem] font-extrabold leading-[0.98] tracking-[-0.05em] text-white sm:text-3xl sm:leading-[1] sm:tracking-[-0.05em] lg:text-[3.4rem]">
                   {currentSlide.title}
                 </h1>
-                <p className="mt-4 max-w-[560px] text-sm text-white/80 sm:text-base lg:text-lg">
+                <p className="mt-4 max-w-[560px] text-sm leading-6 text-white/85 sm:mt-4 sm:text-base sm:leading-normal lg:text-lg">
                   {currentSlide.description}
                 </p>
-                <div className="mt-6 flex flex-wrap gap-4">
-                  <button className="rounded-sm bg-[#f4b740] px-5 py-2.5 text-sm font-bold text-[#0a3d72] shadow-lg shadow-[#f4b740]/20 transition hover:bg-[#e7a330]">View Data Portal</button>
-                  <button onClick={() => onNavigate('contact')} className="rounded-sm border border-white/35 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Contact Us</button>
+                <div className="mt-5 grid max-w-[410px] grid-cols-2 gap-2.5 sm:mt-6 sm:flex sm:max-w-none sm:gap-4">
+                  <button className="rounded-md bg-[#f4b740] px-3 py-3 text-sm font-bold text-[#0a3d72] shadow-lg shadow-[#f4b740]/20 transition hover:bg-[#e7a330] sm:rounded-sm sm:px-5 sm:py-2.5">View Data Portal</button>
+                  <button onClick={() => onNavigate('contact')} className="rounded-md border border-white/40 bg-white/10 px-3 py-3 text-sm font-semibold text-white transition hover:bg-white/15 sm:rounded-sm sm:px-5 sm:py-2.5">Contact Us</button>
                 </div>
 
-                <div className="mt-7 flex items-center gap-2">
+                <div className="mt-5 flex items-center gap-2 sm:mt-7">
                   {heroSlides.map((slide, index) => (
                     <button
                       key={slide.title}
@@ -136,30 +136,30 @@ export default function FISHomePage({ onNavigate }) {
                 </div>
               </div>
 
-              <div className="rounded-[18px] border border-white/15 bg-white/8 p-4 shadow-2xl shadow-[#061d3d]/20 backdrop-blur-sm sm:p-5">
-                <div className="rounded-[14px] bg-white/10 p-4 text-white">
-                  <div className="mb-3 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#f4b740]">
+              <div className="rounded-2xl border border-white/20 bg-[#163b61]/55 p-2 shadow-2xl shadow-[#061d3d]/30 backdrop-blur-md sm:rounded-[18px] sm:bg-white/8 sm:p-4">
+                <div className="rounded-xl bg-white/10 p-4 pb-5 text-white sm:rounded-[14px] sm:p-4">
+                  <div className="mb-2 flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.14em] text-[#f4b740] sm:mb-3 sm:text-[10px] sm:tracking-[0.18em]">
                     <span>Live status</span>
-                    <span className="rounded-full bg-emerald-400/20 px-2 py-1 text-[9px] text-emerald-200">Online</span>
+                    <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[8px] text-emerald-200 sm:py-1 sm:text-[9px]">Online</span>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-2.5 sm:space-y-4">
                     <div>
-                      <div className="text-[12px] uppercase tracking-[0.12em] text-white/60">Wave condition</div>
-                      <div className="mt-2 text-3xl font-extrabold text-white">2.8m</div>
+                      <div className="text-[10px] uppercase tracking-[0.1em] text-white/60 sm:text-[12px] sm:tracking-[0.12em]">Wave condition</div>
+                      <div className="mt-1 text-2xl font-extrabold text-white sm:mt-2 sm:text-3xl">2.8m</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm text-white/80">
+                    <div className="grid grid-cols-2 gap-2 text-xs text-white/80 sm:gap-3 sm:text-sm">
                       <div>
-                        <div className="text-[10px] uppercase tracking-[0.12em] text-white/60">Sea temp</div>
+                        <div className="text-[9px] uppercase tracking-[0.1em] text-white/60 sm:text-[10px] sm:tracking-[0.12em]">Sea temp</div>
                         <div className="mt-1 font-bold text-white">29.4°C</div>
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase tracking-[0.12em] text-white/60">Wind</div>
+                        <div className="text-[9px] uppercase tracking-[0.1em] text-white/60 sm:text-[10px] sm:tracking-[0.12em]">Wind</div>
                         <div className="mt-1 font-bold text-white">18 knots</div>
                       </div>
                     </div>
-                    <div className="rounded-md border border-white/10 bg-[#081f3f]/50 p-3">
-                      <div className="text-[10px] uppercase tracking-[0.12em] text-white/60">Latest bulletin</div>
-                      <div className="mt-2 text-sm text-white/85">Northern coastal region advisory remains in effect until 18:00 hrs.</div>
+                    <div className="rounded-md border border-white/10 bg-[#081f3f]/50 p-2 sm:p-3">
+                      <div className="text-[9px] uppercase tracking-[0.1em] text-white/60 sm:text-[10px] sm:tracking-[0.12em]">Latest bulletin</div>
+                      <div className="mt-1 text-xs leading-4 text-white/85 sm:mt-2 sm:text-sm sm:leading-normal">Northern coastal region advisory remains in effect until 18:00 hrs.</div>
                     </div>
                   </div>
                 </div>
@@ -167,15 +167,6 @@ export default function FISHomePage({ onNavigate }) {
             </div>
           </div>
         </section>
-
-        <div className="bg-[#0c6d7b] text-white">
-          <div className="mx-auto flex max-w-[1440px] items-center gap-3 overflow-hidden px-4 py-3 sm:px-6 lg:px-8">
-            <div className="shrink-0 rounded-sm bg-[#f4b740] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#061d3d]">Notice</div>
-            <div className="overflow-hidden whitespace-nowrap text-[12px] text-white/80">
-              <span className="inline-block animate-[scroll_20s_linear_infinite]">{tickerText} · {tickerText}</span>
-            </div>
-          </div>
-        </div>
 
         <section className="bg-[#edf3f7] py-16 sm:py-20">
           <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
@@ -230,42 +221,41 @@ export default function FISHomePage({ onNavigate }) {
                   <div className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#0a3d72]">Announcements</div>
                   <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-[#103d7a] sm:text-3xl">Latest News &amp; Updates</h2>
                 </div>
-                <button className="rounded-full border border-[#0d3b7c]/20 bg-white px-4 py-2 text-xs font-semibold text-[#0d3b7c] shadow-sm transition hover:bg-[#0d3b7c] hover:text-white">View All ↗</button>
+                <button onClick={() => onNavigate('news')} className="rounded-full border border-[#0d3b7c]/20 bg-white px-4 py-2 text-xs font-semibold text-[#0d3b7c] shadow-sm transition hover:bg-[#0d3b7c] hover:text-white">View All ↗</button>
               </div>
 
+              {newsLoading && <div className="rounded-[18px] border border-slate-200 bg-white p-8 text-center text-slate-500">Loading the latest updates...</div>}
+              {!newsLoading && newsItems.length === 0 && <div className="rounded-[18px] border border-slate-200 bg-white p-8 text-center text-slate-500">No news updates have been published yet.</div>}
               <div className="space-y-4">
-                {newsItems.map((item) => (
+                {newsItems.map((item) => {
+                  const publishedDate = new Date(item.published_at);
+                  return (
                   <article
-                    key={`${item.day}-${item.month}-${item.title}`}
+                    key={item.id}
                     className="flex gap-4 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5"
                   >
-                    <div className="flex w-[76px] shrink-0 flex-col items-center justify-center rounded-[14px] bg-[#0d3b7c] px-2 py-4 text-center text-white shadow-sm">
-                      <div className="text-2xl font-extrabold leading-none">{item.day}</div>
-                      <div className="mt-1 text-[9px] font-bold uppercase tracking-[0.12em] text-sky-100">{item.month}</div>
-                      <div className="mt-1 text-[9px] font-bold uppercase tracking-[0.12em] text-sky-100">{item.year}</div>
+                    <div className="h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[#0d3b7c] sm:h-28 sm:w-32">
+                      <img
+                        src={getNewsImageUrl(item.image_url)}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = DEFAULT_NEWS_IMAGE;
+                        }}
+                      />
                     </div>
 
                     <div className="flex flex-1 flex-col justify-center">
-                      <span
-                        className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] ${
-                          item.tag === 'Advisory' ? 'bg-red-100 text-red-700' :
-                          item.tag === 'Research' ? 'bg-blue-100 text-blue-700' :
-                          item.tag === 'Event' ? 'bg-emerald-100 text-emerald-700' :
-                          item.tag === 'Policy' ? 'bg-violet-100 text-violet-700' : 'bg-amber-100 text-amber-700'
-                        }`}
-                      >
-                        {item.tag}
-                      </span>
+                      <span className="inline-flex w-fit rounded-full bg-cyan-100 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-cyan-800">{item.category}</span>
 
                       <h3 className="mt-3 text-base font-extrabold leading-6 text-[#123d7b] sm:text-[18px]">{item.title}</h3>
-
-                      <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-[#0d3b7c]">
-                        <span>Read more</span>
-                        <span aria-hidden="true">→</span>
-                      </div>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{item.content}</p>
+                      <time className="mt-3 text-xs font-semibold text-[#0d3b7c]">{publishedDate.toLocaleDateString('en', { day: '2-digit', month: 'short', year: 'numeric' })}</time>
                     </div>
                   </article>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

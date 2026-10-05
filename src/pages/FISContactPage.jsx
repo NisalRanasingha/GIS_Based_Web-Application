@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import FISHeader from '../components/FISHeader';
 import FISFooter from '../components/FISFooter';
+import LoadingOverlay from '../components/LoadingOverlay';
+import CenterAlert from '../components/CenterAlert';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -69,26 +71,15 @@ export default function FISContactPage({ onNavigate }) {
     <div className="nara-responsive min-h-screen bg-[#edf3f7] text-[#123d7b]">
       <FISHeader page="contact" onNavigate={onNavigate} />
 
-      {feedback && (
-        <div
-          role="alert"
-          className={`fixed right-4 top-24 z-[60] flex max-w-[calc(100%-2rem)] items-start gap-4 rounded-md border px-4 py-3 text-sm font-semibold shadow-xl sm:right-6 sm:max-w-md ${
-            feedback.type === 'success'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-              : 'border-red-200 bg-red-50 text-red-800'
-          }`}
-        >
-          <span className="flex-1">{feedback.message}</span>
-          <button type="button" onClick={() => setFeedback(null)} aria-label="Dismiss message" className="text-lg leading-none opacity-70 hover:opacity-100">×</button>
-        </div>
-      )}
+      {isSubmitting && <LoadingOverlay />}
+      <CenterAlert type={feedback?.type} message={feedback?.message} onClose={() => setFeedback(null)} />
 
       <main>
-        <section className="bg-[#0d6973] py-12 text-white">
-          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-            <div className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#f4b740]">Fisheries Information Center — NARA</div>
-            <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-white sm:text-5xl">Contact Us</h1>
-            <p className="mt-3 text-base text-white/75">We are here to help — reach out to the Fisheries Information Center</p>
+        <section className="fics-page-banner">
+          <div className="fics-page-banner-inner">
+            <div className="fics-page-banner-eyebrow">Fisheries Information Center</div>
+            <h1>Contact Us</h1>
+            <p className="fics-page-banner-copy">We are here to help — reach out to the Fisheries Information Center</p>
             <div className="mt-5 flex items-center gap-3 text-[13px] text-white/65">
               <button onClick={() => onNavigate('home')} className="transition hover:text-white">Home</button>
               <span>/</span>
@@ -131,7 +122,7 @@ export default function FISContactPage({ onNavigate }) {
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#0d3b7c]/10 text-lg">🕒</div>
                   <div>
                     <div className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-500">Office Hours</div>
-                    <div className="mt-1 text-[15px] leading-7 text-slate-700">Monday – Friday: 8:30 AM – 4:30 PM</div>
+                    <div className="mt-1 text-[15px] leading-7 text-slate-700">Monday – Friday: 8:30 AM – 4:15 PM</div>
                   </div>
                 </div>
               </div>
@@ -219,8 +210,9 @@ export default function FISContactPage({ onNavigate }) {
               </div>
             </form>
           </div>
+          
         </section>
-      </main>
+  </main>
 
       <FISFooter onNavigate={onNavigate} />
     </div>

@@ -5,6 +5,9 @@ import About from './components/About';
 import FISHomePage from './pages/FISHomePage';
 import FISContactPage from './pages/FISContactPage';
 import FISSectionPage from './pages/FISSectionPage';
+import AdminInquiriesPage from './pages/AdminInquiriesPage';
+import AdminNewsPage from './pages/AdminNewsPage';
+import NewsPage from './pages/NewsPage';
 
 const sectionPages = {
   services: {
@@ -35,6 +38,8 @@ const pagePaths = {
   research: '/research',
   publications: '/publications',
   news: '/news',
+  adminInquiries: '/admin/inquiries',
+  adminNews: '/admin/news',
 };
 
 const pageFromPath = (pathname) => {
@@ -66,6 +71,9 @@ function App() {
   if (page === 'signup') return <Signup onNavigate={handleNavigate} />;
   if (page === 'about') return <About onNavigate={handleNavigate} />;
   if (page === 'contact') return <FISContactPage onNavigate={handleNavigate} />;
+  if (page === 'adminInquiries') return <AdminInquiriesPage />;
+  if (page === 'adminNews') return <AdminNewsPage />;
+  if (page === 'news') return <NewsPage onNavigate={handleNavigate} />;
   if (sectionPages[page]) return <FISSectionPage page={page} {...sectionPages[page]} onNavigate={handleNavigate} />;
 
   return <FISHomePage onNavigate={handleNavigate} />;

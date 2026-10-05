@@ -7,11 +7,11 @@ export default function FISSectionPage({ page, title, description, onNavigate })
       <FISHeader page={page} onNavigate={onNavigate} />
 
       <main className="flex-1">
-        <section className="bg-[#0d6973] py-16 text-white sm:py-24">
-          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-            <div className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#f4b740]">Fisheries Information Center - NARA</div>
-            <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] sm:text-6xl">{title}</h1>
-            <p className="mt-4 max-w-2xl text-base text-white/80 sm:text-lg">{description}</p>
+        <section className="fics-page-banner">
+          <div className="fics-page-banner-inner">
+            <div className="fics-page-banner-eyebrow">Fisheries Information Center</div>
+            <h1>{title}</h1>
+            <p className="fics-page-banner-copy">{description}</p>
           </div>
         </section>
 

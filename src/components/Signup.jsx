@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './Signup.css'
-import FISHeader from './FISHeader'
+import LoadingOverlay from './LoadingOverlay'
+import CenterAlert from './CenterAlert'
 
 function Signup({ onNavigate }) {
   const [submitted, setSubmitted] = useState(false)
@@ -39,6 +40,12 @@ function Signup({ onNavigate }) {
 
   return (
     <main className="signup-page">
+      {isSubmitting && <LoadingOverlay message="Creating account..." />}
+      <CenterAlert
+        type={error ? 'error' : submitted ? 'success' : undefined}
+        message={error || (submitted ? 'Account created successfully.' : '')}
+        onClose={() => { setError(''); setSubmitted(false) }}
+      />
       
       <section className="signup-card" aria-label="Create your account">
         <div className="image-panel">
@@ -79,8 +86,6 @@ function Signup({ onNavigate }) {
               <input type="password" name="confirmPassword" placeholder="Re-enter the password" minLength="5" required />
             </label>
 
-            {error && <p className="form-message error-message" role="alert">{error}</p>}
-            {submitted && <p className="form-message success-message" role="status">Account created successfully.</p>}
             <button className="primary-button" type="submit">
               {isSubmitting ? 'Creating Account...' : submitted ? 'Account Created' : 'Sign Up'}
             </button>
