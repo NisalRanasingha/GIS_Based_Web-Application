@@ -12,7 +12,7 @@ const formatDate = (value) => new Intl.DateTimeFormat('en', {
   timeStyle: 'short',
 }).format(new Date(value));
 
-export default function AdminInquiriesPage() {
+export default function AdminInquiriesPage({ onNavigate }) {
   const [inquiries, setInquiries] = useState([]);
   const [stats, setStats] = useState({ total: 0, new: 0, in_progress: 0, resolved: 0, attention: 0 });
   const [selected, setSelected] = useState(null);
@@ -79,7 +79,7 @@ export default function AdminInquiriesPage() {
       <section className="admin-content">
         <div className="admin-heading-row">
           <div><p className="admin-kicker">Operations overview</p><h1>Incoming inquiries</h1><p className="admin-subtitle">Keep every request moving to the right team.</p></div>
-          <div className="admin-heading-actions"><a href="/admin/news" className="refresh-button">News manager</a><button type="button" className="refresh-button" onClick={() => loadInquiries()} disabled={isLoading}><span aria-hidden="true">↻</span> Refresh</button></div>
+          <div className="admin-heading-actions"><a href="/admin" className="refresh-button" onClick={(event) => { event.preventDefault(); onNavigate('admin'); }}>Dashboard</a><a href="/admin/news" className="refresh-button" onClick={(event) => { event.preventDefault(); onNavigate('adminNews'); }}>News manager</a><button type="button" className="refresh-button" onClick={() => loadInquiries()} disabled={isLoading}><span aria-hidden="true">↻</span> Refresh</button></div>
         </div>
 
         <div className="stats-grid">

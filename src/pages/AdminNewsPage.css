@@ -1,6 +1,7 @@
 .news-admin { min-height: 100vh; padding: 48px clamp(20px, 5vw, 80px); background: #eef7fa; color: #123d7b; }
 .news-admin-header, .news-admin-grid { width: min(1320px, 100%); margin: 0 auto; }
 .news-admin-header { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.news-header-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .news-admin-kicker, .form-heading span, .list-heading span { color: #087c91; font-size: 11px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
 .news-admin h1 { margin: 8px 0 6px; color: #0d3b7c; font-size: clamp(2.2rem, 5vw, 4rem); letter-spacing: -.05em; }
 .news-admin-header p { margin: 0; color: #617787; }

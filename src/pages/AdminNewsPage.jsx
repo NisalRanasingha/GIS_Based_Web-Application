@@ -7,7 +7,7 @@ const emptyForm = { title: '', category: 'News', content: '', imageUrl: '', publ
 
 const formatDate = (value) => new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date(value));
 
-export default function AdminNewsPage() {
+export default function AdminNewsPage({ onNavigate }) {
   const [news, setNews] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
@@ -55,7 +55,7 @@ export default function AdminNewsPage() {
     if (response.ok) { setFeedback('News item deleted.'); await loadNews(); }
   };
 
-  return <main className="news-admin"><header className="news-admin-header"><div><span className="news-admin-kicker">Content studio</span><h1>News &amp; events</h1><p>Publish the updates that appear on the public home page.</p></div><button type="button" className="news-refresh" onClick={loadNews}>Refresh</button></header>
+  return <main className="news-admin"><header className="news-admin-header"><div><span className="news-admin-kicker">Content studio</span><h1>News &amp; events</h1><p>Publish the updates that appear on the public home page.</p></div><div className="news-header-actions"><a href="/admin" className="news-refresh" onClick={(event) => { event.preventDefault(); onNavigate('admin'); }}>Dashboard</a><button type="button" className="news-refresh" onClick={loadNews}>Refresh</button></div></header>
     {feedback && <div className="news-feedback">{feedback}</div>}
     <div className="news-admin-grid"><form className="news-form" onSubmit={handleSubmit}><div className="form-heading"><div><span>{editingId ? 'Edit update' : 'New update'}</span><h2>{editingId ? 'Refine publication' : 'Add a publication'}</h2></div>{editingId && <button type="button" className="cancel-edit" onClick={() => { setEditingId(null); setForm(emptyForm); }}>Cancel</button>}</div>
       <label>Headline<input name="title" value={form.title} onChange={updateForm} required maxLength="220" placeholder="Enter a clear headline" /></label>
