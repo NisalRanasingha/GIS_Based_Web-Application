@@ -190,8 +190,8 @@ export default function FISHomePage({ onNavigate }) {
           <div className="absolute inset-0 bg-gradient-to-b from-[#061d3d]/90 via-[#061d3d]/55 to-[#061d3d]/88 sm:bg-gradient-to-r sm:from-[#061d3d]/90 sm:via-[#061d3d]/72 sm:to-[#061d3d]/40" />
 
           <div className="relative mx-auto flex min-h-[calc(100dvh-68px)] max-w-[1440px] items-start px-4 py-8 max-[375px]:min-h-[calc(100dvh-64px)] max-[375px]:px-3 max-[375px]:pt-10 max-[375px]:pb-5 sm:h-full sm:min-h-0 sm:items-center sm:px-6 sm:py-0 lg:px-8">
-            <div className="grid w-full items-start gap-7 sm:items-end sm:gap-6 lg:grid-cols-[1.5fr_0.8fr]">
-              <div className="max-w-[700px] text-white sm:pb-1 sm:pt-3">
+            <div className="grid w-full items-start gap-7 sm:items-center sm:gap-6 lg:grid-cols-[1.5fr_0.8fr]">
+              <div className="max-w-[700px] text-white">
                 <div className="mb-3 inline-flex rounded-full border border-[#f4b740]/35 bg-[#061d3d]/30 px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#f4b740] sm:mb-5 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-[11px] sm:tracking-[0.16em]">{currentSlide.eyebrow}</div>
                 <h1 className="max-w-[620px] text-[2.2rem] font-bold leading-[1.05] tracking-[-0.03em] text-white sm:text-3xl sm:leading-[1.08] sm:tracking-[-0.03em] lg:text-[3.2rem]">
                   {currentSlide.title}
