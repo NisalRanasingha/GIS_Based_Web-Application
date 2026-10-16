@@ -30,9 +30,10 @@ img { max-width: 100%; display: block; }
 .app-shell { min-height: 100vh; }
 
 .fics-page-banner {
-  padding: 58px 0 62px;
+  padding: 46px 0 50px;
   color: #fff;
-  background: #0d6973;
+  border-top: 4px solid #f0b429;
+  background: #124a78;
 }
 
 .fics-page-banner-inner {
@@ -53,7 +54,7 @@ img { max-width: 100%; display: block; }
 .fics-page-banner h1 {
   margin: 5px 0 10px;
   color: #fff;
-  font-size: clamp(2.5rem, 6vw, 4.6rem);
+  font-size: clamp(2.3rem, 5vw, 3.8rem);
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0;

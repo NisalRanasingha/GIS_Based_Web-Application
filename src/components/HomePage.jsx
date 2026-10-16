@@ -1,3 +1,7 @@
+import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf'
+
+const vesselManagementUrl = 'https://fisheriesdept.gov.lk/regulations/'
+
 const services = [
   {
     icon: '🐟',
@@ -47,12 +51,12 @@ const newsItems = [
 ]
 
 const quickLinks = [
-  'Fish Landing Statistics',
-  'Vessel Registration Portal',
-  'Licensing & Permits',
-  'Research Grants',
-  'Fisheries Act 2026',
-  'Marine Protected Areas',
+  { label: 'Fish Landing Statistics', href: '#' },
+  { label: 'Vessel Registration and Management', href: vesselManagementUrl, external: true },
+  { label: 'Licensing & Permits', href: '#' },
+  { label: 'Research Grants', href: '#' },
+  { label: 'Fisheries Act 2016', href: fishingActPdf, external: true },
+  { label: 'Marine Protected Areas', href: '#' },
 ]
 
 export default function HomePage({ onNavigate }) {
@@ -149,11 +153,11 @@ export default function HomePage({ onNavigate }) {
               <h3>Quick Links</h3>
               <div className="quick-links-list">
                 {quickLinks.map((link) => (
-                  <button key={link} type="button" className="quick-link-item" onClick={() => onNavigate('contact')}>
+                  <a key={link.label} href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noreferrer' : undefined} className="quick-link-item">
                     <span className="link-icon">↗</span>
-                    <span>{link}</span>
+                    <span>{link.label}</span>
                     <span className="chevron">›</span>
-                  </button>
+                  </a>
                 ))}
               </div>
 

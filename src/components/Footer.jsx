@@ -1,3 +1,7 @@
+import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf'
+
+const vesselManagementUrl = 'https://fisheriesdept.gov.lk/regulations/'
+
 export default function Footer({ onNavigate }) {
   const footerLinks = ['Privacy Policy', 'Disclaimer', 'Sitemap', 'RTI Act', 'Tenders', 'Vacancies']
 
@@ -28,8 +32,17 @@ export default function Footer({ onNavigate }) {
         <div className="footer-column">
           <h4>Quick Links</h4>
           <ul>
-            {['Fish Landing Statistics', 'Vessel Registration Portal', 'Licensing & Permits', 'Research Grants', 'Fisheries Act 2026', 'Marine Protected Areas'].map((link) => (
-              <li key={link}>{link}</li>
+            {[
+              { label: 'Fish Landing Statistics' },
+              { label: 'Vessel Registration and Management', href: vesselManagementUrl, external: true },
+              { label: 'Licensing & Permits' },
+              { label: 'Research Grants' },
+              { label: 'Fisheries Act 2016', href: fishingActPdf, external: true },
+              { label: 'Marine Protected Areas' },
+            ].map((link) => (
+              <li key={link.label}>
+                {link.href ? <a href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noreferrer' : undefined}>{link.label}</a> : link.label}
+              </li>
             ))}
           </ul>
         </div>

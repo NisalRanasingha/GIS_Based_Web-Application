@@ -2,6 +2,47 @@ import { useEffect, useState } from 'react';
 import FISHeader from '../components/FISHeader';
 import FISFooter from '../components/FISFooter';
 import { DEFAULT_NEWS_IMAGE, getNewsImageUrl } from '../utils/newsImage';
+import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf';
+
+const vesselManagementUrl = 'https://fisheriesdept.gov.lk/regulations/';
+const marineLocations = [
+  { id: 'colombo', name: 'Colombo', latitude: 6.5, longitude: 79.6 },
+  { id: 'negombo', name: 'Negombo', latitude: 7.2, longitude: 79.6 },
+  { id: 'mannar', name: 'Mannar', latitude: 9, longitude: 79.5 },
+  { id: 'jaffna', name: 'Jaffna', latitude: 9.5, longitude: 80.4 },
+  { id: 'trincomalee', name: 'Trincomalee', latitude: 8.4, longitude: 82 },
+  { id: 'batticaloa', name: 'Batticaloa', latitude: 7.3, longitude: 82 },
+  { id: 'galle', name: 'Galle', latitude: 5.8, longitude: 80.1 },
+  { id: 'hambantota', name: 'Hambantota', latitude: 5.7, longitude: 81.5 },
+  { id: 'oluvil', name: 'Oluvil', latitude: 7.25, longitude: 81.95 },
+  { id: 'tangalla', name: 'Tangalla', latitude: 5.95, longitude: 80.85 },
+  { id: 'kudawella', name: 'Kudawella', latitude: 5.93, longitude: 80.8 },
+];
+const getMarineApiUrl = ({ latitude, longitude }) => `https://marine-api.open-meteo.com/v1/marine?latitude=${latitude}&longitude=${longitude}&hourly=wave_height,wave_direction,wave_period,swell_wave_height&forecast_days=7&timezone=Asia%2FColombo&cell_selection=sea`;
+const formatMarineNumber = (value, unit) => Number.isFinite(value) ? `${value.toFixed(1)}${unit}` : '—';
+const formatForecastDate = (value) => new Intl.DateTimeFormat('en', { weekday: 'short', day: 'numeric' }).format(new Date(`${value}T12:00:00`));
+const formatWaveDirection = (degrees) => {
+  if (!Number.isFinite(degrees)) return '—';
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  return `${directions[Math.round(degrees / 45) % directions.length]} (${Math.round(degrees)}°)`;
+};
+const buildDailyForecast = (hourly = {}) => {
+  const days = new Map();
+  (hourly.time || []).forEach((time, index) => {
+    const date = time.slice(0, 10);
+    const waveHeight = hourly.wave_height?.[index];
+    const existing = days.get(date);
+    if (!existing || waveHeight > existing.waveHeight) {
+      days.set(date, {
+        date,
+        waveHeight,
+        waveDirection: hourly.wave_direction?.[index],
+        wavePeriod: hourly.wave_period?.[index],
+      });
+    }
+  });
+  return [...days.values()].slice(0, 7);
+};
 
 const services = [
   {
@@ -68,6 +109,9 @@ export default function FISHomePage({ onNavigate }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [newsItems, setNewsItems] = useState([]);
   const [newsLoading, setNewsLoading] = useState(true);
+  const [selectedMarineLocation, setSelectedMarineLocation] = useState(marineLocations[0].id);
+  const [marineData, setMarineData] = useState(null);
+  const [marineError, setMarineError] = useState('');
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -76,6 +120,44 @@ export default function FISHomePage({ onNavigate }) {
 
     return () => clearInterval(intervalId);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadMarineData = async () => {
+      try {
+        const location = marineLocations.find(({ id }) => id === selectedMarineLocation) || marineLocations[0];
+        const response = await fetch(getMarineApiUrl(location));
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.error) throw new Error(result.reason || 'Unable to load marine conditions.');
+        const times = result.hourly?.time || [];
+        const currentIndex = times.reduce((closestIndex, time, index) => (
+          Math.abs(new Date(time).getTime() - Date.now()) < Math.abs(new Date(times[closestIndex]).getTime() - Date.now())
+            ? index
+            : closestIndex
+        ), 0);
+        if (!cancelled) {
+          setMarineData({
+            time: times[currentIndex],
+            waveHeight: result.hourly?.wave_height?.[currentIndex],
+            waveDirection: result.hourly?.wave_direction?.[currentIndex],
+            wavePeriod: result.hourly?.wave_period?.[currentIndex],
+            swellHeight: result.hourly?.swell_wave_height?.[currentIndex],
+            forecast: buildDailyForecast(result.hourly),
+          });
+          setMarineError('');
+        }
+      } catch (loadError) {
+        if (!cancelled) setMarineError(loadError.message);
+      }
+    };
+    const initialRefresh = window.setTimeout(loadMarineData, 0);
+    const refreshInterval = window.setInterval(loadMarineData, 15 * 60 * 1000);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(initialRefresh);
+      window.clearInterval(refreshInterval);
+    };
+  }, [selectedMarineLocation]);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/news?limit=5`)
@@ -87,6 +169,7 @@ export default function FISHomePage({ onNavigate }) {
       .finally(() => setNewsLoading(false));
   }, []);
 
+  const currentMarineLocation = marineLocations.find(({ id }) => id === selectedMarineLocation) || marineLocations[0];
   const currentSlide = heroSlides[activeSlide];
 
   return (
@@ -94,7 +177,7 @@ export default function FISHomePage({ onNavigate }) {
       <FISHeader page="home" onNavigate={onNavigate} />
 
       <main>
-        <section className="relative h-[calc(100dvh-68px)] min-h-0 w-full overflow-hidden bg-[#0a3d72] max-[375px]:h-[calc(100dvh-64px)] sm:h-[calc(100dvh-148px)]">
+        <section className="relative h-auto min-h-[calc(100dvh-68px)] w-full overflow-visible bg-[#0a3d72] max-[375px]:min-h-[calc(100dvh-64px)] sm:h-[calc(100dvh-148px)] sm:overflow-hidden">
           {heroSlides.map((slide, index) => (
             <div
               key={slide.title}
@@ -106,19 +189,19 @@ export default function FISHomePage({ onNavigate }) {
           ))}
           <div className="absolute inset-0 bg-gradient-to-b from-[#061d3d]/90 via-[#061d3d]/55 to-[#061d3d]/88 sm:bg-gradient-to-r sm:from-[#061d3d]/90 sm:via-[#061d3d]/72 sm:to-[#061d3d]/40" />
 
-          <div className="relative mx-auto flex h-full max-w-[1440px] items-center px-4 py-8 max-[375px]:px-3 max-[375px]:pt-10 max-[375px]:pb-5 sm:px-6 sm:py-0 lg:px-8">
-            <div className="grid w-full items-center gap-7 sm:items-end sm:gap-6 lg:grid-cols-[1.5fr_0.8fr]">
+          <div className="relative mx-auto flex min-h-[calc(100dvh-68px)] max-w-[1440px] items-start px-4 py-8 max-[375px]:min-h-[calc(100dvh-64px)] max-[375px]:px-3 max-[375px]:pt-10 max-[375px]:pb-5 sm:h-full sm:min-h-0 sm:items-center sm:px-6 sm:py-0 lg:px-8">
+            <div className="grid w-full items-start gap-7 sm:items-end sm:gap-6 lg:grid-cols-[1.5fr_0.8fr]">
               <div className="max-w-[700px] text-white sm:pb-1 sm:pt-3">
-                <div className="mb-3 inline-flex rounded-full border border-[#f4b740]/35 bg-[#061d3d]/30 px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#f4b740] sm:mb-5 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-[11px] sm:tracking-[0.2em]">{currentSlide.eyebrow}</div>
-                <h1 className="max-w-[620px] text-[2.35rem] font-extrabold leading-[0.98] tracking-[-0.05em] text-white sm:text-3xl sm:leading-[1] sm:tracking-[-0.05em] lg:text-[3.4rem]">
+                <div className="mb-3 inline-flex rounded-full border border-[#f4b740]/35 bg-[#061d3d]/30 px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#f4b740] sm:mb-5 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:text-[11px] sm:tracking-[0.16em]">{currentSlide.eyebrow}</div>
+                <h1 className="max-w-[620px] text-[2.2rem] font-bold leading-[1.05] tracking-[-0.03em] text-white sm:text-3xl sm:leading-[1.08] sm:tracking-[-0.03em] lg:text-[3.2rem]">
                   {currentSlide.title}
                 </h1>
-                <p className="mt-4 max-w-[560px] text-sm leading-6 text-white/85 sm:mt-4 sm:text-base sm:leading-normal lg:text-lg">
+                <p className="mt-4 max-w-[560px] text-sm leading-6 font-normal text-white/85 sm:mt-4 sm:text-base sm:leading-7 lg:text-lg">
                   {currentSlide.description}
                 </p>
                 <div className="mt-5 grid max-w-[410px] grid-cols-2 gap-2.5 sm:mt-6 sm:flex sm:max-w-none sm:gap-4">
-                  <button className="rounded-md bg-[#f4b740] px-3 py-3 text-sm font-bold text-[#0a3d72] shadow-lg shadow-[#f4b740]/20 transition hover:bg-[#e7a330] sm:rounded-sm sm:px-5 sm:py-2.5">View Data Portal</button>
-                  <button onClick={() => onNavigate('contact')} className="rounded-md border border-white/40 bg-white/10 px-3 py-3 text-sm font-semibold text-white transition hover:bg-white/15 sm:rounded-sm sm:px-5 sm:py-2.5">Contact Us</button>
+                  <button className="rounded-md bg-[#f4b740] px-3 py-3 text-sm font-semibold text-[#0a3d72] shadow-lg shadow-[#f4b740]/20 transition hover:bg-[#e7a330] sm:rounded-sm sm:px-5 sm:py-2.5">View Data Portal</button>
+                  <button onClick={() => onNavigate('contact')} className="rounded-md border border-white/40 bg-white/10 px-3 py-3 text-sm font-normal text-white transition hover:bg-white/15 sm:rounded-sm sm:px-5 sm:py-2.5">Contact Us</button>
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 sm:mt-7">
@@ -136,30 +219,55 @@ export default function FISHomePage({ onNavigate }) {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/20 bg-[#163b61]/55 p-2 shadow-2xl shadow-[#061d3d]/30 backdrop-blur-md sm:rounded-[18px] sm:bg-white/8 sm:p-4">
-                <div className="rounded-xl bg-white/10 p-4 pb-5 text-white sm:rounded-[14px] sm:p-4">
-                  <div className="mb-2 flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.14em] text-[#f4b740] sm:mb-3 sm:text-[10px] sm:tracking-[0.18em]">
+              <div className="w-full min-w-0 rounded-2xl border border-white/20 bg-[#163b61]/55 p-2 shadow-2xl shadow-[#061d3d]/30 backdrop-blur-md sm:rounded-[18px] sm:bg-white/8 sm:p-3">
+                <div className="rounded-xl bg-white/10 p-4 pb-5 text-white sm:rounded-[14px] sm:p-3">
+                  <div className="mb-2 flex items-center justify-between text-[9px] font-semibold uppercase tracking-[0.12em] text-[#f4b740] sm:mb-2 sm:text-[10px] sm:tracking-[0.14em]">
                     <span>Live status</span>
-                    <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[8px] text-emerald-200 sm:py-1 sm:text-[9px]">Online</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[8px] sm:py-1 sm:text-[9px] ${marineError ? 'bg-red-400/20 text-red-200' : 'bg-emerald-400/20 text-emerald-200'}`}>{marineError ? 'Unavailable' : 'Online'}</span>
                   </div>
-                  <div className="space-y-2.5 sm:space-y-4">
+                  <label className="mb-3 block text-[9px] font-bold uppercase tracking-[0.1em] text-white sm:mb-3 sm:text-[10px]">
+                   <span className="mb-3 block text-[9px] font-bold uppercase tracking-[0.1em] text-white sm:mb-3 sm:text-[10px]"> Monitoring location</span>
+                    <select
+                      value={selectedMarineLocation}
+                      onChange={(event) => setSelectedMarineLocation(event.target.value)}
+                      className="mt-1.5 block w-full rounded border border-white/20 bg-[#123456]/80 px-2 py-1.5 text-xs normal-case tracking-normal text-white outline-none transition focus:border-[#f4b740]"
+                      aria-label="Select marine monitoring location"
+                    >
+                      {marineLocations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
+                    </select>
+                  </label>
+                  <div className="space-y-2.5 sm:space-y-2.5">
                     <div>
                       <div className="text-[10px] uppercase tracking-[0.1em] text-white/60 sm:text-[12px] sm:tracking-[0.12em]">Wave condition</div>
-                      <div className="mt-1 text-2xl font-extrabold text-white sm:mt-2 sm:text-3xl">2.8m</div>
+                      <div className="mt-1 text-2xl font-bold text-white sm:mt-1.5 sm:text-3xl">{formatMarineNumber(marineData?.waveHeight, ' m')}</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-white/80 sm:gap-3 sm:text-sm">
+                    <div className="grid grid-cols-2 gap-2 text-xs text-white/80 max-[360px]:grid-cols-1 sm:gap-3 sm:text-sm">
                       <div>
                         <div className="text-[9px] uppercase tracking-[0.1em] text-white/60 sm:text-[10px] sm:tracking-[0.12em]">Sea temp</div>
-                        <div className="mt-1 font-bold text-white">29.4°C</div>
+                        <div className="mt-1 font-semibold text-white">{formatWaveDirection(marineData?.waveDirection)}</div>
                       </div>
                       <div>
                         <div className="text-[9px] uppercase tracking-[0.1em] text-white/60 sm:text-[10px] sm:tracking-[0.12em]">Wind</div>
-                        <div className="mt-1 font-bold text-white">18 knots</div>
+                        <div className="mt-1 font-semibold text-white">{formatMarineNumber(marineData?.wavePeriod, ' s')}</div>
                       </div>
                     </div>
-                    <div className="rounded-md border border-white/10 bg-[#081f3f]/50 p-2 sm:p-3">
+                    <div className="rounded-md border border-white/10 bg-[#081f3f]/50 p-2 sm:p-2.5">
                       <div className="text-[9px] uppercase tracking-[0.1em] text-white/60 sm:text-[10px] sm:tracking-[0.12em]">Latest bulletin</div>
-                      <div className="mt-1 text-xs leading-4 text-white/85 sm:mt-2 sm:text-sm sm:leading-normal">Northern coastal region advisory remains in effect until 18:00 hrs.</div>
+                      <div className="mt-1 text-xs leading-4 text-white/85 sm:mt-2 sm:text-sm sm:leading-normal">{marineError || (marineData ? `${currentMarineLocation.name} coastal waters are reporting ${formatMarineNumber(marineData.waveHeight, ' m')} waves from the ${formatWaveDirection(marineData.waveDirection).split(' (')[0]} with a ${formatMarineNumber(marineData.wavePeriod, ' second')} period.` : 'Marine conditions are being retrieved automatically.')}</div>
+                    </div>
+                    <div className="rounded-md border border-white/10 bg-[#081f3f]/50 p-2 sm:p-2.5">
+                      <div className="mb-2 text-[9px] font-bold uppercase tracking-[0.1em] text-white sm:text-[10px]">7-day forecast</div>
+                      <div className="flex max-w-full gap-1.5 overflow-x-auto pb-1">
+                        {(marineData?.forecast || []).map((day) => (
+                          <div key={day.date} className="min-w-[58px] flex-1 rounded border border-white/10 bg-white/10 px-1.5 py-2 text-center max-[420px]:flex-none">
+                            <div className="text-[9px] font-semibold text-white/75">{formatForecastDate(day.date)}</div>
+                            <div className="mt-1 text-xs font-bold text-white">{formatMarineNumber(day.waveHeight, ' m')}</div>
+                            <div className="mt-0.5 text-[9px] text-white/70">{formatWaveDirection(day.waveDirection).split(' (')[0]}</div>
+                            <div className="mt-0.5 text-[9px] text-white/60">{formatMarineNumber(day.wavePeriod, ' s')}</div>
+                          </div>
+                        ))}
+                        {!marineData?.forecast?.length && <div className="text-xs text-white/70">Forecast data is being retrieved automatically.</div>}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -168,73 +276,117 @@ export default function FISHomePage({ onNavigate }) {
           </div>
         </section>
 
-        <section className="bg-[#edf3f7] py-16 sm:py-20">
-          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-            <div className="mb-10 text-center">
-              <div className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#0a3d72]">Fisheries Information Center</div>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-[#103d7a] sm:text-5xl">Our Services</h2>
-              <p className="mx-auto mt-4 max-w-3xl text-base text-slate-600 sm:text-xl">
-                Comprehensive information services for the aquatic resources sector
-              </p>
+        <section className="border-t-4 border-[#0b568d] bg-[#eaf2f7] py-10 sm:py-14">
+          <div className="mx-auto grid max-w-[1440px] gap-7 px-4 sm:px-6 lg:grid-cols-[3fr_2fr] lg:items-stretch lg:px-8">
+            <div>
+              <div className="mb-5 flex items-end justify-between gap-4 border-b border-[#b9cbd8] pb-3">
+                <div>
+                  <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#0b568d]">Fisheries Information Center</div>
+                  <h2 className="text-2xl font-bold tracking-[-0.03em] text-[#124a78] sm:text-3xl">Our Services</h2>
+                </div>
+                <span className="hidden text-xs font-semibold text-slate-500 sm:block">Explore NARA information services</span>
+              </div>
+
+              <div className="mb-5 flex flex-wrap border border-[#b9cbd8] bg-white">
+                {['Ecosystem Services', 'Marine Data', 'Advisories', 'Research Support'].map((label, index) => (
+                  <span
+                    key={label}
+                    className={`border-r border-[#b9cbd8] px-3 py-2 text-[11px] font-bold sm:px-4 ${
+                      index === 0 ? 'bg-[#0b568d] text-white' : 'text-[#245678]'
+                    }`}
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                {services.map((service) => (
+                  <article
+                    key={service.title}
+                    className="group flex h-full flex-col overflow-hidden border border-[#c4d3dd] bg-white shadow-[0_2px_6px_rgba(21,67,98,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-[#0b568d] hover:shadow-md"
+                  >
+                    <div className="h-32 w-full overflow-hidden border-b-2 border-[#f0b429] bg-slate-200 sm:h-36">
+                      <img
+                        src={service.image}
+                        alt={service.title}
+                        className="h-full w-full object-cover grayscale-[15%] transition duration-300 group-hover:scale-105 group-hover:grayscale-0"
+                      />
+                    </div>
+
+                    <div className="flex flex-1 flex-col p-4">
+                      <h3 className="mb-2 text-base font-bold text-[#124a78]">{service.title}</h3>
+                      <p className="text-[13px] leading-5 text-slate-600">{service.text}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {services.map((service) => (
-                <article
-                  key={service.title}
-                  className="group flex h-full flex-col overflow-hidden rounded-[16px] border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg"
-                >
-                  <div className="h-52 w-full overflow-hidden bg-slate-200">
-                    <img
-                      src={service.image}
-                      alt={service.title}
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                    />
-                  </div>
-
-                  <div className="flex flex-1 flex-col p-5 sm:p-6">
-                    <h3 className="mb-3 text-xl font-extrabold text-[#103d7a]">{service.title}</h3>
-                    <p className="text-[15px] leading-7 text-slate-600">{service.text}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <aside className="flex flex-col overflow-hidden border border-[#b9cbd8] bg-white shadow-[0_2px_8px_rgba(21,67,98,0.1)]">
+              <div className="bg-[#124a78] px-5 py-4 text-white sm:px-6">
+                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#f0c04a]">Location &amp; access</div>
+                <h2 className="mt-1 text-xl font-bold tracking-[-0.02em] text-white">Find NARA on the map</h2>
+              </div>
+              <div className="border-b border-[#d4e0e7] px-5 py-4 sm:px-6">
+                <p className="text-sm font-semibold text-[#245678]">NARA Fisheries Information Center</p>
+                <p className="mt-1 text-[13px] leading-5 text-slate-600">
+                  Crow Island, Mattakkuliya, Colombo 15, Sri Lanka
+                </p>
+              </div>
+              <div className="h-[280px] border-b-4 border-[#0b568d] bg-slate-200 lg:h-[210px] lg:min-h-0">
+                <iframe
+                  title="Map showing the NARA Fisheries Information Center"
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=79.853%2C6.956%2C79.890%2C6.985&amp;layer=mapnik&amp;marker=6.970%2C79.872"
+                  className="h-full min-h-[280px] w-full border-0 lg:min-h-0"
+                  loading="lazy"
+                />
+              </div>
+              <a
+                href="https://www.openstreetmap.org/?mlat=6.970&amp;mlon=79.872#map=15/6.970/79.872"
+                target="_blank"
+                rel="noreferrer"
+                className="bg-[#f5f8fa] px-4 py-3 text-center text-xs font-bold uppercase tracking-[0.08em] text-[#0b568d] transition hover:bg-[#e8f1f6]"
+              >
+                View larger map →
+              </a>
+            </aside>
           </div>
         </section>
 
-        <section className="bg-[#0d6973] py-12 text-white">
-          <div className="mx-auto grid max-w-[1440px] gap-6 px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
+        <section className="border-y border-[#174d72] bg-[#124a78] py-6 text-white sm:py-8">
+          <div className="mx-auto grid max-w-[1440px] grid-cols-4 gap-1 px-2 sm:gap-6 sm:px-6 lg:px-8">
             {stats.map((stat, index) => (
-              <div key={stat.label} className={`${index !== stats.length - 1 ? 'border-b border-white/15 pb-5 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-6' : ''}`}>
-                <div className="text-4xl font-extrabold text-[#f4b740] sm:text-5xl">{stat.value}</div>
-                <div className="mt-2 text-[15px] text-white/80">{stat.label}</div>
+              <div key={stat.label} className={`min-w-0 px-1 sm:px-0 ${index !== stats.length - 1 ? 'border-r border-white/15 sm:pr-6' : ''}`}>
+                <div className="text-2xl font-bold leading-none text-[#f4b740] sm:text-4xl">{stat.value}</div>
+                <div className="mt-1 text-[9px] leading-tight text-white/80 sm:mt-2 sm:text-[15px]">{stat.label}</div>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="bg-[#edf3f7] py-16 sm:py-20">
+        <section className="border-t-4 border-[#0b568d] bg-[#eaf2f7] py-10 sm:py-14">
           <div className="mx-auto grid max-w-[1440px] gap-8 px-4 sm:px-6 lg:grid-cols-[1.7fr_0.9fr] lg:px-8">
             <div>
-              <div className="mb-6 flex items-center justify-between gap-3">
+              <div className="mb-5 flex items-end justify-between gap-3 border-b border-[#b9cbd8] pb-3">
                 <div>
-                  <div className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#0a3d72]">Announcements</div>
-                  <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-[#103d7a] sm:text-3xl">Latest News &amp; Updates</h2>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0b568d]">Announcements</div>
+                  <h2 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-[#124a78] sm:text-3xl">Latest News &amp; Events</h2>
                 </div>
-                <button onClick={() => onNavigate('news')} className="rounded-full border border-[#0d3b7c]/20 bg-white px-4 py-2 text-xs font-semibold text-[#0d3b7c] shadow-sm transition hover:bg-[#0d3b7c] hover:text-white">View All ↗</button>
+                <button onClick={() => onNavigate('news')} className="border border-[#b9cbd8] bg-white px-3 py-2 text-[11px] font-bold uppercase tracking-[0.06em] text-[#0b568d] transition hover:bg-[#0b568d] hover:text-white">View All ↗</button>
               </div>
 
-              {newsLoading && <div className="rounded-[18px] border border-slate-200 bg-white p-8 text-center text-slate-500">Loading the latest updates...</div>}
-              {!newsLoading && newsItems.length === 0 && <div className="rounded-[18px] border border-slate-200 bg-white p-8 text-center text-slate-500">No news updates have been published yet.</div>}
-              <div className="space-y-4">
+              {newsLoading && <div className="border border-[#c4d3dd] bg-white p-8 text-center text-slate-500">Loading the latest updates...</div>}
+              {!newsLoading && newsItems.length === 0 && <div className="border border-[#c4d3dd] bg-white p-8 text-center text-slate-500">No news updates have been published yet.</div>}
+              <div className="space-y-3">
                 {newsItems.map((item) => {
                   const publishedDate = new Date(item.published_at);
                   return (
                   <article
                     key={item.id}
-                    className="flex gap-4 rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5"
+                    className="flex gap-4 border border-[#c4d3dd] border-l-4 border-l-[#f0b429] bg-white p-3 shadow-[0_2px_6px_rgba(21,67,98,0.08)] transition hover:border-l-[#0b568d] hover:shadow-md sm:p-4"
                   >
-                    <div className="h-24 w-24 shrink-0 overflow-hidden rounded-[14px] bg-[#0d3b7c] sm:h-28 sm:w-32">
+                    <div className="h-20 w-20 shrink-0 overflow-hidden bg-[#0d3b7c] sm:h-24 sm:w-28">
                       <img
                         src={getNewsImageUrl(item.image_url)}
                         alt=""
@@ -247,11 +399,11 @@ export default function FISHomePage({ onNavigate }) {
                     </div>
 
                     <div className="flex flex-1 flex-col justify-center">
-                      <span className="inline-flex w-fit rounded-full bg-cyan-100 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-cyan-800">{item.category}</span>
+                      <span className="inline-flex w-fit bg-[#e7f1f6] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#0b568d]">{item.category}</span>
 
-                      <h3 className="mt-3 text-base font-extrabold leading-6 text-[#123d7b] sm:text-[18px]">{item.title}</h3>
-                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{item.content}</p>
-                      <time className="mt-3 text-xs font-semibold text-[#0d3b7c]">{publishedDate.toLocaleDateString('en', { day: '2-digit', month: 'short', year: 'numeric' })}</time>
+                      <h3 className="mt-2 text-base font-bold leading-6 text-[#124a78] sm:text-[17px]">{item.title}</h3>
+                      <p className="mt-1 line-clamp-2 text-[13px] leading-5 text-slate-600">{item.content}</p>
+                      <time className="mt-2 text-[11px] font-semibold text-[#0b568d]">{publishedDate.toLocaleDateString('en', { day: '2-digit', month: 'short', year: 'numeric' })}</time>
                     </div>
                   </article>
                   );
@@ -260,24 +412,25 @@ export default function FISHomePage({ onNavigate }) {
             </div>
 
             <aside className="space-y-5">
-              <div className="rounded-[12px] border border-slate-200 bg-white/40 p-5">
-                <h3 className="mb-4 text-3xl font-extrabold text-[#103d7a]">Quick Links</h3>
+              <div className="border border-[#b9cbd8] bg-white p-5">
+                <h3 className="mb-4 border-b border-[#d4e0e7] pb-3 text-xl font-bold text-[#124a78]">Quick Links</h3>
                 <div className="space-y-3">
-                  {['Fish Landing Statistics', 'Vessel Registration Portal', 'Licensing & Permits', 'Research Grants', 'Fisheries Act 2026', 'Marine Protected Areas'].map((link) => (
-                    <a key={link} href="#" className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-white/60 px-4 py-3 text-[15px] font-medium text-[#123d7b] transition hover:border-[#0d3b7c]/30 hover:bg-[#edf5ff]">
-                      <span>{link}</span>
+                  {[
+                    { label: 'Fish Landing Statistics', href: '#' },
+                    { label: 'Vessel Registration and Management', href: vesselManagementUrl, external: true },
+                    { label: 'Licensing & Permits', href: '#' },
+                    { label: 'Research Grants', href: '#' },
+                    { label: 'Fisheries Act 2016', href: fishingActPdf, external: true },
+                    { label: 'Marine Protected Areas', href: '#' },
+                  ].map((link) => (
+                    <a key={link.label} href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noreferrer' : undefined} className="flex items-center justify-between gap-3 border-b border-[#d4e0e7] px-2 py-2 text-[13px] font-semibold text-[#245678] transition hover:bg-[#edf5ff] hover:text-[#0b568d]">
+                      <span>{link.label}</span>
                       <span className="text-[#0d3b7c]">›</span>
                     </a>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-[12px] bg-[#0d3b7c] p-6 text-white shadow-lg shadow-[#0d3b7c]/20">
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-2xl">🐟</div>
-                <h3 className="text-3xl font-extrabold text-white">Contact Us</h3>
-                <p className="mt-3 text-[15px] leading-7 text-white/75">Have a question or need technical assistance?</p>
-                <button onClick={() => onNavigate('contact')} className="mt-5 w-full rounded-sm bg-[#f4b740] px-5 py-3 text-sm font-bold text-[#0a3d72] transition hover:bg-[#e7a330]">Send an Inquiry →</button>
-              </div>
             </aside>
           </div>
         </section>

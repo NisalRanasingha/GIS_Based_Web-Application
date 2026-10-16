@@ -88,13 +88,14 @@ export default function FISContactPage({ onNavigate }) {
           </div>
         </section>
 
-        <section className="mx-auto grid max-w-[1440px] gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1.08fr_1.72fr] lg:px-8">
+        <section className="mx-auto grid max-w-[1440px] gap-7 border-t-4 border-[#0b568d] bg-[#eaf2f7] px-4 py-10 sm:px-6 lg:grid-cols-[1.08fr_1.72fr] lg:px-8">
           <div className="space-y-6">
-            <div className="rounded-[12px] border border-slate-200 bg-white/80 p-6 shadow-sm">
-              <h2 className="mb-4 text-[15px] font-extrabold uppercase tracking-[0.12em] text-[#0d3b7c]">Fisheries Information Center</h2>
+            <div className="border border-[#b9cbd8] bg-white shadow-[0_2px_8px_rgba(21,67,98,0.08)]">
+              <h2 className="border-b-4 border-[#f0b429] bg-[#124a78] px-5 py-4 text-[14px] font-bold uppercase tracking-[0.12em] text-white">Fisheries Information Center</h2>
+              <div className="p-5">
               <div className="space-y-5">
                 <div className="flex gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#0d3b7c]/10 text-lg">📍</div>
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-[#e7f1f6] text-lg">📍</div>
                   <div>
                     <div className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-500">Address</div>
                     <div className="mt-1 text-[15px] leading-7 text-slate-700">NARA, Crow Island, Mattakkuliya, Colombo 15, Sri Lanka</div>
@@ -126,10 +127,12 @@ export default function FISContactPage({ onNavigate }) {
                   </div>
                 </div>
               </div>
+              </div>
             </div>
 
-            <div className="overflow-hidden rounded-[12px] border border-slate-200 bg-white/80 shadow-sm">
-              <div className="h-[280px] w-full overflow-hidden">
+            <div className="overflow-hidden border border-[#b9cbd8] bg-white shadow-[0_2px_8px_rgba(21,67,98,0.08)]">
+              <div className="border-b-4 border-[#0b568d] bg-[#124a78] px-5 py-3 text-xs font-bold uppercase tracking-[0.1em] text-white">Location map</div>
+              <div className="h-[240px] w-full overflow-hidden">
                 <iframe
                   title="NARA Location"
                   src="https://www.google.com/maps?q=National%20Aquatic%20Resources%20Research%20and%20Development%20Agency%20(NARA)&z=15&output=embed"
@@ -142,8 +145,8 @@ export default function FISContactPage({ onNavigate }) {
             </div>
           </div>
 
-          <div className="rounded-[12px] border border-slate-200 bg-white/80 p-6 shadow-sm sm:p-8">
-            <h2 className="mb-6 text-2xl font-extrabold text-[#103d7a]">Send an Inquiry</h2>
+          <div className="border border-[#b9cbd8] bg-white p-5 shadow-[0_2px_8px_rgba(21,67,98,0.08)] sm:p-7">
+            <h2 className="mb-5 border-b border-[#d4e0e7] pb-3 text-2xl font-bold text-[#124a78]">Send an Inquiry</h2>
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="grid gap-5 md:grid-cols-2">
                 <div>

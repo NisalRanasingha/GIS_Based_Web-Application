@@ -47,8 +47,8 @@ export default function FISHeader({ page, onNavigate }) {
             </div>
 
             <div className="min-w-0">
-              <div className="whitespace-nowrap text-[8px] font-bold uppercase tracking-[0.1em] text-[#0a3d72] sm:text-[11px] sm:font-extrabold sm:tracking-[0.18em]">Fisheries Information Center</div>
-              <div className="mt-0.5 text-[11px] font-semibold leading-tight text-[#103d7a] sm:mt-1 sm:text-base lg:text-[1.8rem]">
+              <div className="whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.08em] text-[#0a3d72] sm:text-[11px] sm:tracking-[0.12em]">Fisheries Information Center</div>
+              <div className="mt-0.5 text-[11px] font-medium leading-tight text-[#103d7a] sm:mt-1 sm:text-base lg:text-[1.55rem]">
                 National Aquatic Resources Research and Development Agency
               </div>
               <div className="mt-0.5 text-[8px] text-slate-500 sm:mt-1 sm:text-[11px]">Ministry of Fisheries, Sri Lanka</div>
@@ -74,7 +74,7 @@ export default function FISHeader({ page, onNavigate }) {
               <button
                 key={item}
                 onClick={() => handleNav(item)}
-                className={`whitespace-nowrap px-4 py-4 text-[12px] font-medium transition sm:px-5 ${
+                className={`whitespace-nowrap px-4 py-4 text-[12px] font-normal transition sm:px-5 ${
                   isActive(item)
                     ? 'border-b-2 border-[#f4b740] text-white'
                     : 'text-white/80 hover:bg-white/5 hover:text-white'
@@ -107,7 +107,7 @@ export default function FISHeader({ page, onNavigate }) {
                   <button
                     key={item}
                     onClick={() => handleNav(item)}
-                    className={`flex w-full items-center justify-between rounded-md px-3 py-3 text-left text-sm font-medium transition ${
+                    className={`flex w-full items-center justify-between rounded-md px-3 py-3 text-left text-sm font-normal transition ${
                       isActive(item) ? 'bg-white/10 text-white' : 'text-white/80 hover:bg-white/5 hover:text-white'
                     }`}
                   >
