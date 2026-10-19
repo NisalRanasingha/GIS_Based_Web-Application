@@ -237,6 +237,9 @@ app.delete('/api/admin/news/:id', async (req, res, next) => {
     res.json({ success: true, message: 'News item deleted.' });
   } catch (error) {
     next(error);
+  }
+});
+
 app.post('/api/register', async (req, res, next) => {
   try {
     const registration = registrationSchema.parse(req.body);
