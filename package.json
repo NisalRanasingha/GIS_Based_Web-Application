@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "node \"GIS Backend/server.js\"",
-    "dev:full": "node \"GIS Backend/server.js\"",
+    "server": "npm --prefix FIS_Backend run start",
+    "dev:full": "npm run server",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
