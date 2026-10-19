@@ -33,7 +33,6 @@ const pagePaths = {
   news: '/news',
   adminInquiries: '/admin/inquiries',
   adminNews: '/admin/news',
-  admin: '/admin',
 };
 
 const pageFromPath = (pathname) => {

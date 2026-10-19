@@ -1,4 +1,4 @@
-function AdminDashboard({ currentUser, onNavigate, onLogout }) {
+function AdminDashboard({ currentUser, onLogout }) {
   return (
     <main style={{ padding: '2rem', minHeight: '100vh', background: '#f4f8fb', color: '#0a3d72' }}>
       <section style={{ maxWidth: '1100px', margin: '0 auto', background: '#ffffff', borderRadius: '18px', padding: '2rem', boxShadow: '0 18px 40px rgba(10, 61, 114, 0.08)' }}>

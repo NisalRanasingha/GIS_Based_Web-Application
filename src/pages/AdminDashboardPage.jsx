@@ -35,7 +35,9 @@ export default function AdminDashboardPage({ onNavigate }) {
   }, []);
 
   useEffect(() => {
-    loadDashboard();
+    // The dashboard fetch updates local state after the effect starts.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadDashboard();
   }, [loadDashboard]);
 
   const stats = inquiryData.stats;
