@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import logo from '../assets/FISlogo.png';
 
-const navItems = ['Home', 'About Us', 'Services', 'Research', 'Publications', 'News & Events', 'Contact Us'];
+const navItems = ['Home', 'About Us', 'Services', 'News & Events', 'Contact Us'];
 
 const pageByLabel = {
   Home: 'home',
   'About Us': 'about',
   Services: 'services',
-  Research: 'research',
-  Publications: 'publications',
   'News & Events': 'news',
   'Contact Us': 'contact',
 };
@@ -92,9 +90,14 @@ export default function FISHeader({ page, onNavigate }) {
                 onNavigate('login');
                 setMenuOpen(false);
               }}
-              className="hidden shrink-0 items-center rounded-sm border border-transparent bg-transparent px-2.5 py-2 text-[13px] font-semibold text-white/90 transition hover:border-white/30 hover:text-white md:flex"
+              className="hidden shrink-0 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-2 text-[13px] font-semibold text-white transition hover:border-[#f4b740] hover:bg-white/15 md:flex"
             >
-              Login
+              <svg aria-hidden="true" className="h-4 w-4 text-[#f4b740]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M15 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 3 18.5V20" />
+                <circle cx="9" cy="7" r="3.5" />
+                <path d="M16 11h5m-2.5-2.5L21 11l-2.5 2.5" />
+              </svg>
+              <span>Login</span>
             </button>
           )}
         </div>
@@ -123,9 +126,16 @@ export default function FISHeader({ page, onNavigate }) {
                       onNavigate('login');
                       setMenuOpen(false);
                     }}
-                    className="mt-2 flex w-full items-center justify-between rounded-md border border-white/20 bg-transparent px-3 py-3 text-left text-sm font-semibold text-white"
+                    className="mt-2 flex w-full items-center justify-between rounded-md border border-white/20 bg-white/10 px-3 py-3 text-left text-sm font-semibold text-white transition hover:border-[#f4b740]"
                   >
-                    <span>Login</span>
+                    <span className="flex items-center gap-2">
+                      <svg aria-hidden="true" className="h-4 w-4 text-[#f4b740]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M15 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 3 18.5V20" />
+                        <circle cx="9" cy="7" r="3.5" />
+                        <path d="M16 11h5m-2.5-2.5L21 11l-2.5 2.5" />
+                      </svg>
+                      <span>Login</span>
+                    </span>
                     <span className="text-xs text-[#f4b740]">›</span>
                   </button>
                 )}

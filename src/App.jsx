@@ -13,15 +13,7 @@ import NewsPage from './pages/NewsPage';
 const sectionPages = {
   services: {
     title: 'Services',
-    description: 'Explore the information, research, and advisory services provided by the Fisheries Information Center.',
-  },
-  research: {
-    title: 'Research',
-    description: 'Discover research programs and scientific findings supporting Sri Lanka\'s aquatic resources.',
-  },
-  publications: {
-    title: 'Publications',
-    description: 'Browse reports, journals, statistics, and technical publications from NARA.',
+    description: 'Explore the information and advisory services provided by the Fisheries Information Center.',
   },
   news: {
     title: 'News & Events',
@@ -36,8 +28,6 @@ const pagePaths = {
   about: '/about',
   contact: '/contact',
   services: '/services',
-  research: '/research',
-  publications: '/publications',
   news: '/news',
   adminInquiries: '/admin/inquiries',
   adminNews: '/admin/news',

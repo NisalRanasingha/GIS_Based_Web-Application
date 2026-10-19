@@ -30,14 +30,14 @@ img { max-width: 100%; display: block; }
 .app-shell { min-height: 100vh; }
 
 .fics-page-banner {
-  padding: 46px 0 50px;
+  padding: 28px 0 32px;
   color: #fff;
   border-top: 4px solid #f0b429;
   background: #124a78;
 }
 
 .fics-page-banner-inner {
-  width: min(1120px, calc(100% - 48px));
+  width: min(1320px, calc(100% - 48px));
   margin: 0 auto;
 }
 
@@ -52,9 +52,9 @@ img { max-width: 100%; display: block; }
 }
 
 .fics-page-banner h1 {
-  margin: 5px 0 10px;
+  margin: 4px 0 7px;
   color: #fff;
-  font-size: clamp(2.3rem, 5vw, 3.8rem);
+  font-size: clamp(1.9rem, 4vw, 3rem);
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0;
@@ -62,17 +62,17 @@ img { max-width: 100%; display: block; }
 }
 
 .fics-page-banner-copy {
-  max-width: 510px;
+  max-width: 620px;
   margin: 0;
   color: #d9eff0;
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: .92rem;
+  line-height: 1.5;
 }
 
 @media (max-width: 760px) {
-  .fics-page-banner { padding: 42px 0 46px; }
+  .fics-page-banner { padding: 24px 0 28px; }
   .fics-page-banner-inner { width: min(100% - 36px, 560px); }
-  .fics-page-banner-copy { font-size: .9rem; }
+  .fics-page-banner-copy { font-size: .86rem; }
 }
 
 .notice-bar {

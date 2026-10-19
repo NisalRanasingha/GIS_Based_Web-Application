@@ -3,6 +3,7 @@ import FISHeader from '../components/FISHeader';
 import FISFooter from '../components/FISFooter';
 import { DEFAULT_NEWS_IMAGE, getNewsImageUrl } from '../utils/newsImage';
 import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf';
+import { services } from '../data/services';
 
 const vesselManagementUrl = 'https://fisheriesdept.gov.lk/regulations/';
 const marineLocations = [
@@ -43,39 +44,6 @@ const buildDailyForecast = (hourly = {}) => {
   });
   return [...days.values()].slice(0, 7);
 };
-
-const services = [
-  {
-    image: '/services/Fish.jpg',
-    title: 'Fish Stock Assessment',
-    text: 'Periodic assessment of demersal and pelagic fish stocks in Sri Lankan waters for sustainable management.',
-  },
-  {
-    image: '/services/Oceanographic.jpg',
-    title: 'Oceanographic Data',
-    text: 'Real-time sea surface temperature, salinity, and current data from coastal buoy networks.',
-  },
-  {
-    image: '/services/Marine.jpg',
-    title: 'Marine Weather Advisories',
-    text: 'Specialized forecasts and storm warnings issued directly to fishing communities and vessels.',
-  },
-  {
-    image: '/services/market.jpg',
-    title: 'Market Information',
-    text: 'Daily fish landing statistics and market prices from all major harbours island-wide.',
-  },
-  {
-    image: '/services/aquaculture.jpg',
-    title: 'Aquaculture Support',
-    text: 'Technical guidance, licensing, and certification for inland and coastal aquaculture operations.',
-  },
-  {
-    image: '/services/books.jpg',
-    title: 'Publications & Reports',
-    text: 'Research journals, annual fisheries statistics, and technical reports available for download.',
-  },
-];
 
 const stats = [
   { value: '2.3M', label: 'Metric Tons Annual Catch' },
@@ -288,16 +256,9 @@ export default function FISHomePage({ onNavigate }) {
               </div>
 
               <div className="mb-5 flex flex-wrap border border-[#b9cbd8] bg-white">
-                {['Ecosystem Services', 'Marine Data', 'Advisories', 'Research Support'].map((label, index) => (
-                  <span
-                    key={label}
-                    className={`border-r border-[#b9cbd8] px-3 py-2 text-[11px] font-bold sm:px-4 ${
-                      index === 0 ? 'bg-[#0b568d] text-white' : 'text-[#245678]'
-                    }`}
-                  >
-                    {label}
-                  </span>
-                ))}
+                <span className="bg-[#0b568d] px-3 py-2 text-[11px] font-bold text-white sm:px-4">
+                  Ecosystem Services
+                </span>
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">

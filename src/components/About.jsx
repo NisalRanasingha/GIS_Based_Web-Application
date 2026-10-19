@@ -1,6 +1,7 @@
 import './About.css'
 import FISHeader from './FISHeader'
 import FISFooter from './FISFooter'
+import InternalPageBanner from './InternalPageBanner'
 
 const activities = [
   'Supporting sustainable fisheries through practical research, accurate data, and responsible resource management.',
@@ -16,13 +17,7 @@ function About({ onNavigate }) {
     <FISHeader page="about" onNavigate={onNavigate} />
 
       <main>
-        <section className="about-hero">
-          <div className="page-width">
-            <p className="eyebrow">Fisheries Information Center</p>
-            <h1>About us</h1>
-            <p className="hero-copy">Connecting people, research, and the ocean through dependable fisheries information.</p>
-          </div>
-        </section>
+        <InternalPageBanner title="About Us" description="Connecting people, research, and the ocean through dependable fisheries information." />
 
         <div className="page-width about-content">
           <section className="intro-section">

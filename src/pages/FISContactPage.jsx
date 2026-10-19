@@ -2,6 +2,7 @@ import { useState } from 'react';
 import FISHeader from '../components/FISHeader';
 import FISFooter from '../components/FISFooter';
 import LoadingOverlay from '../components/LoadingOverlay';
+import InternalPageBanner from '../components/InternalPageBanner';
 import CenterAlert from '../components/CenterAlert';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -75,18 +76,7 @@ export default function FISContactPage({ onNavigate }) {
       <CenterAlert type={feedback?.type} message={feedback?.message} onClose={() => setFeedback(null)} />
 
       <main>
-        <section className="fics-page-banner">
-          <div className="fics-page-banner-inner">
-            <div className="fics-page-banner-eyebrow">Fisheries Information Center</div>
-            <h1>Contact Us</h1>
-            <p className="fics-page-banner-copy">We are here to help — reach out to the Fisheries Information Center</p>
-            <div className="mt-5 flex items-center gap-3 text-[13px] text-white/65">
-              <button onClick={() => onNavigate('home')} className="transition hover:text-white">Home</button>
-              <span>/</span>
-              <span className="text-white">Contact Us</span>
-            </div>
-          </div>
-        </section>
+        <InternalPageBanner title="Contact Us" description="We are here to help — reach out to the Fisheries Information Center" />
 
         <section className="mx-auto grid max-w-[1440px] gap-7 border-t-4 border-[#0b568d] bg-[#eaf2f7] px-4 py-10 sm:px-6 lg:grid-cols-[1.08fr_1.72fr] lg:px-8">
           <div className="space-y-6">
