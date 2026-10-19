@@ -11,9 +11,10 @@ const pageByLabel = {
   'Contact Us': 'contact',
 };
 
-export default function FISHeader({ page, onNavigate }) {
+export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const hideLoginButton = page === 'login' || page === 'signup';
+  const userName = currentUser?.first_name?.trim() || currentUser?.firstName?.trim() || 'Account';
 
   const isActive = (label) => {
     return pageByLabel[label] === page;
@@ -83,7 +84,18 @@ export default function FISHeader({ page, onNavigate }) {
             ))}
           </div>
 
-          {!hideLoginButton && (
+          {!hideLoginButton && (currentUser ? (
+            <div className="hidden shrink-0 items-center gap-3 md:flex">
+              <span className="text-[13px] font-semibold text-white">Hi, {userName}</span>
+              <button
+                type="button"
+                onClick={onLogout}
+                className="rounded-full border border-white/25 bg-white/10 px-3.5 py-2 text-[13px] font-semibold text-white transition hover:border-[#f4b740] hover:bg-white/15"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
             <button
               type="button"
               onClick={() => {
@@ -99,7 +111,7 @@ export default function FISHeader({ page, onNavigate }) {
               </svg>
               <span>Login</span>
             </button>
-          )}
+          ))}
         </div>
 
         {menuOpen && (
@@ -119,7 +131,21 @@ export default function FISHeader({ page, onNavigate }) {
                   </button>
                 ))}
 
-                {!hideLoginButton && (
+                {!hideLoginButton && (currentUser ? (
+                  <div className="mt-2 flex items-center justify-between gap-3 rounded-md border border-white/20 bg-white/10 px-3 py-3 text-sm font-semibold text-white">
+                    <span>Hi, {userName}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onLogout();
+                        setMenuOpen(false);
+                      }}
+                      className="rounded border border-white/25 px-3 py-1.5 hover:border-[#f4b740]"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : (
                   <button
                     type="button"
                     onClick={() => {
@@ -138,7 +164,7 @@ export default function FISHeader({ page, onNavigate }) {
                     </span>
                     <span className="text-xs text-[#f4b740]">›</span>
                   </button>
-                )}
+                ))}
               </div>
             </div>
           </div>

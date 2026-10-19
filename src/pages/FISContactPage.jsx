@@ -7,7 +7,7 @@ import CenterAlert from '../components/CenterAlert';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export default function FISContactPage({ onNavigate }) {
+export default function FISContactPage({ onNavigate, currentUser, onLogout }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
@@ -70,7 +70,7 @@ export default function FISContactPage({ onNavigate }) {
 
   return (
     <div className="nara-responsive min-h-screen bg-[#edf3f7] text-[#123d7b]">
-      <FISHeader page="contact" onNavigate={onNavigate} />
+      <FISHeader page="contact" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout} />
 
       {isSubmitting && <LoadingOverlay />}
       <CenterAlert type={feedback?.type} message={feedback?.message} onClose={() => setFeedback(null)} />

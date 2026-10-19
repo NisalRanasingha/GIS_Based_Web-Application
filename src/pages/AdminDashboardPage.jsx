@@ -7,7 +7,7 @@ const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const statusLabels = { new: 'New', in_progress: 'In progress', resolved: 'Resolved' };
 const formatDate = (value) => new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value));
 
-export default function AdminDashboardPage({ onNavigate }) {
+export default function AdminDashboardPage({ currentUser, onNavigate, onLogout }) {
   const [inquiryData, setInquiryData] = useState({ inquiries: [], stats: {} });
   const [news, setNews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,12 +62,12 @@ export default function AdminDashboardPage({ onNavigate }) {
             <a href="/admin/news" onClick={(event) => navigate(event, 'adminNews')}><span>✦</span>News &amp; events</a>
           <a href="/" target="_blank" rel="noreferrer"><span>↗</span>View public site</a>
         </nav>
-        <div className="dashboard-sidebar-footer"><span className="dashboard-online" />System operational<a href="/">Sign out</a></div>
+        <div className="dashboard-sidebar-footer"><span className="dashboard-online" />System operational<button type="button" onClick={onLogout}>Sign out</button></div>
       </aside>
 
       <section className="dashboard-main">
         <header className="dashboard-header">
-          <div><p className="dashboard-eyebrow">Administration / Overview</p><h1>Good morning, Admin</h1><p>Here&apos;s what is happening across the information center today.</p></div>
+          <div><p className="dashboard-eyebrow">Administration / Overview</p><h1>Good morning, {currentUser?.first_name || 'Admin'}</h1><p>Here&apos;s what is happening across the information center today.</p></div>
           <button type="button" className="dashboard-refresh" onClick={loadDashboard} disabled={isLoading}>↻ <span>{isLoading ? 'Refreshing...' : 'Refresh data'}</span></button>
         </header>
 

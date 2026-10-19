@@ -3,10 +3,10 @@ import FISFooter from '../components/FISFooter';
 import InternalPageBanner from '../components/InternalPageBanner';
 import { services } from '../data/services';
 
-export default function FISSectionPage({ page, title, description, onNavigate }) {
+export default function FISSectionPage({ page, title, description, onNavigate, currentUser, onLogout }) {
   return (
     <div className="nara-responsive flex min-h-screen flex-col bg-[#edf3f7] text-[#123d7b]">
-      <FISHeader page={page} onNavigate={onNavigate} />
+      <FISHeader page={page} onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout} />
 
       <main className="flex-1">
         <InternalPageBanner title={title} description={description} />

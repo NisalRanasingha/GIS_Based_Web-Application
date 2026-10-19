@@ -11,10 +11,10 @@ const activities = [
   'Contributing to a healthier ocean through science-led policy, education, and conservation initiatives.',
 ]
 
-function About({ onNavigate }) {
+function About({ onNavigate, currentUser, onLogout }) {
   return (
     <div className="about-page">
-    <FISHeader page="about" onNavigate={onNavigate} />
+    <FISHeader page="about" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout} />
 
       <main>
         <InternalPageBanner title="About Us" description="Connecting people, research, and the ocean through dependable fisheries information." />

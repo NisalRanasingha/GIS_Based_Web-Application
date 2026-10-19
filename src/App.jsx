@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import About from './components/About';
-import AdminDashboard from './components/AdminDashboard';
 import FISHomePage from './pages/FISHomePage';
 import FISContactPage from './pages/FISContactPage';
 import FISSectionPage from './pages/FISSectionPage';
@@ -34,6 +33,7 @@ const pagePaths = {
   adminInquiries: '/admin/inquiries',
   adminNews: '/admin/news',
 };
+const adminPages = new Set(['admin', 'adminInquiries', 'adminNews']);
 
 const pageFromPath = (pathname) => {
   const normalizedPath = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
@@ -55,7 +55,7 @@ function App() {
   const handleNavigate = (nextPage) => {
     const isAdminRoute = currentUser?.role === 'admin';
 
-    if (isAdminRoute && nextPage !== 'admin') {
+    if (isAdminRoute && !adminPages.has(nextPage)) {
       window.history.pushState({}, '', pagePaths.admin);
       setPage('admin');
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -81,14 +81,21 @@ function App() {
     window.sessionStorage.removeItem('fis_token');
     window.sessionStorage.removeItem('fis_user');
     setCurrentUser(null);
-    handleNavigate('home');
+    window.history.pushState({}, '', pagePaths.home);
+    setPage('home');
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   };
 
   useEffect(() => {
     const handlePopState = () => {
       if (currentUser?.role === 'admin') {
-        window.history.pushState({}, '', pagePaths.admin);
-        setPage('admin');
+        const nextPage = pageFromPath(window.location.pathname);
+        if (!adminPages.has(nextPage)) {
+          window.history.pushState({}, '', pagePaths.admin);
+          setPage('admin');
+          return;
+        }
+        setPage(nextPage);
         return;
       }
 
@@ -105,21 +112,24 @@ function App() {
 
   if (page === 'login') return <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />;
   if (page === 'signup') return <Signup onNavigate={handleNavigate} />;
-  if (page === 'admin') {
+  if (adminPages.has(page)) {
     if (!currentUser || currentUser.role !== 'admin') {
-      return <FISHomePage onNavigate={handleNavigate} />;
+      return <FISHomePage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
     }
-    return <AdminDashboard currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} />;
+    if (page === 'admin') {
+      return <AdminDashboardPage currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} />;
+    }
+    if (page === 'adminInquiries') return <AdminInquiriesPage onNavigate={handleNavigate} />;
+    return <AdminNewsPage onNavigate={handleNavigate} />;
   }
-  if (page === 'about') return <About onNavigate={handleNavigate} />;
-  if (page === 'contact') return <FISContactPage onNavigate={handleNavigate} />;
-  if (page === 'adminInquiries') return <AdminInquiriesPage onNavigate={handleNavigate} />;
-  if (page === 'adminNews') return <AdminNewsPage onNavigate={handleNavigate} />;
-  if (page === 'admin') return <AdminDashboardPage onNavigate={handleNavigate} />;
-  if (page === 'news') return <NewsPage onNavigate={handleNavigate} />;
-  if (sectionPages[page]) return <FISSectionPage page={page} {...sectionPages[page]} onNavigate={handleNavigate} />;
+  if (page === 'about') return <About onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
+  if (page === 'contact') return <FISContactPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
+  if (page === 'news') return <NewsPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
+  if (sectionPages[page]) {
+    return <FISSectionPage page={page} {...sectionPages[page]} onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
+  }
 
-  return <FISHomePage onNavigate={handleNavigate} />;
+  return <FISHomePage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
 }
 
 export default App;

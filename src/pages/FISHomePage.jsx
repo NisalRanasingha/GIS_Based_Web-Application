@@ -73,7 +73,7 @@ const heroSlides = [
   },
 ];
 
-export default function FISHomePage({ onNavigate }) {
+export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [newsItems, setNewsItems] = useState([]);
   const [newsLoading, setNewsLoading] = useState(true);
@@ -142,7 +142,7 @@ export default function FISHomePage({ onNavigate }) {
 
   return (
     <div className="nara-responsive min-h-screen bg-[#edf3f7] text-[#123d7b]">
-      <FISHeader page="home" onNavigate={onNavigate} />
+      <FISHeader page="home" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout} />
 
       <main>
         <section className="relative h-auto min-h-[calc(100dvh-68px)] w-full overflow-visible bg-[#0a3d72] max-[375px]:min-h-[calc(100dvh-64px)] sm:h-[calc(100dvh-148px)] sm:overflow-hidden">
