@@ -1,3 +1,15 @@
+# GIS Based Web Application
+
+## Admin inquiry desk
+
+The inquiry dashboard is available at `/admin/inquiries` and displays all saved inquiries from the database:
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/database
+FRONTEND_URL=http://localhost:5173
+```
+
+Start the backend from `FIS_Backend` with `npm start`, then open the frontend at `http://localhost:5173/admin/inquiries`. The dashboard supports searching, status and priority filters, status/priority updates, internal notes, email replies, refresh, and deletion.
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

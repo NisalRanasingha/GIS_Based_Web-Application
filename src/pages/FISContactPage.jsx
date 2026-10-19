@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import FISHeader from '../components/FISHeader';
 import FISFooter from '../components/FISFooter';
+import LoadingOverlay from '../components/LoadingOverlay';
+import InternalPageBanner from '../components/InternalPageBanner';
+import CenterAlert from '../components/CenterAlert';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -69,41 +72,20 @@ export default function FISContactPage({ onNavigate }) {
     <div className="nara-responsive min-h-screen bg-[#edf3f7] text-[#123d7b]">
       <FISHeader page="contact" onNavigate={onNavigate} />
 
-      {feedback && (
-        <div
-          role="alert"
-          className={`fixed right-4 top-24 z-[60] flex max-w-[calc(100%-2rem)] items-start gap-4 rounded-md border px-4 py-3 text-sm font-semibold shadow-xl sm:right-6 sm:max-w-md ${
-            feedback.type === 'success'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-              : 'border-red-200 bg-red-50 text-red-800'
-          }`}
-        >
-          <span className="flex-1">{feedback.message}</span>
-          <button type="button" onClick={() => setFeedback(null)} aria-label="Dismiss message" className="text-lg leading-none opacity-70 hover:opacity-100">×</button>
-        </div>
-      )}
+      {isSubmitting && <LoadingOverlay />}
+      <CenterAlert type={feedback?.type} message={feedback?.message} onClose={() => setFeedback(null)} />
 
       <main>
-        <section className="bg-[#0d6973] py-12 text-white">
-          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-            <div className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#f4b740]">Fisheries Information Center — NARA</div>
-            <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-white sm:text-5xl">Contact Us</h1>
-            <p className="mt-3 text-base text-white/75">We are here to help — reach out to the Fisheries Information Center</p>
-            <div className="mt-5 flex items-center gap-3 text-[13px] text-white/65">
-              <button onClick={() => onNavigate('home')} className="transition hover:text-white">Home</button>
-              <span>/</span>
-              <span className="text-white">Contact Us</span>
-            </div>
-          </div>
-        </section>
+        <InternalPageBanner title="Contact Us" description="We are here to help — reach out to the Fisheries Information Center" />
 
-        <section className="mx-auto grid max-w-[1440px] gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1.08fr_1.72fr] lg:px-8">
+        <section className="mx-auto grid max-w-[1440px] gap-7 border-t-4 border-[#0b568d] bg-[#eaf2f7] px-4 py-10 sm:px-6 lg:grid-cols-[1.08fr_1.72fr] lg:px-8">
           <div className="space-y-6">
-            <div className="rounded-[12px] border border-slate-200 bg-white/80 p-6 shadow-sm">
-              <h2 className="mb-4 text-[15px] font-extrabold uppercase tracking-[0.12em] text-[#0d3b7c]">Fisheries Information Center</h2>
+            <div className="border border-[#b9cbd8] bg-white shadow-[0_2px_8px_rgba(21,67,98,0.08)]">
+              <h2 className="border-b-4 border-[#f0b429] bg-[#124a78] px-5 py-4 text-[14px] font-bold uppercase tracking-[0.12em] text-white">Fisheries Information Center</h2>
+              <div className="p-5">
               <div className="space-y-5">
                 <div className="flex gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#0d3b7c]/10 text-lg">📍</div>
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-[#e7f1f6] text-lg">📍</div>
                   <div>
                     <div className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-500">Address</div>
                     <div className="mt-1 text-[15px] leading-7 text-slate-700">NARA, Crow Island, Mattakkuliya, Colombo 15, Sri Lanka</div>
@@ -131,14 +113,16 @@ export default function FISContactPage({ onNavigate }) {
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#0d3b7c]/10 text-lg">🕒</div>
                   <div>
                     <div className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-500">Office Hours</div>
-                    <div className="mt-1 text-[15px] leading-7 text-slate-700">Monday – Friday: 8:30 AM – 4:30 PM</div>
+                    <div className="mt-1 text-[15px] leading-7 text-slate-700">Monday – Friday: 8:30 AM – 4:15 PM</div>
                   </div>
                 </div>
               </div>
+              </div>
             </div>
 
-            <div className="overflow-hidden rounded-[12px] border border-slate-200 bg-white/80 shadow-sm">
-              <div className="h-[280px] w-full overflow-hidden">
+            <div className="overflow-hidden border border-[#b9cbd8] bg-white shadow-[0_2px_8px_rgba(21,67,98,0.08)]">
+              <div className="border-b-4 border-[#0b568d] bg-[#124a78] px-5 py-3 text-xs font-bold uppercase tracking-[0.1em] text-white">Location map</div>
+              <div className="h-[240px] w-full overflow-hidden">
                 <iframe
                   title="NARA Location"
                   src="https://www.google.com/maps?q=National%20Aquatic%20Resources%20Research%20and%20Development%20Agency%20(NARA)&z=15&output=embed"
@@ -151,8 +135,8 @@ export default function FISContactPage({ onNavigate }) {
             </div>
           </div>
 
-          <div className="rounded-[12px] border border-slate-200 bg-white/80 p-6 shadow-sm sm:p-8">
-            <h2 className="mb-6 text-2xl font-extrabold text-[#103d7a]">Send an Inquiry</h2>
+          <div className="border border-[#b9cbd8] bg-white p-5 shadow-[0_2px_8px_rgba(21,67,98,0.08)] sm:p-7">
+            <h2 className="mb-5 border-b border-[#d4e0e7] pb-3 text-2xl font-bold text-[#124a78]">Send an Inquiry</h2>
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
@@ -219,8 +203,9 @@ export default function FISContactPage({ onNavigate }) {
               </div>
             </form>
           </div>
+          
         </section>
-      </main>
+  </main>
 
       <FISFooter onNavigate={onNavigate} />
     </div>

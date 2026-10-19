@@ -1,12 +1,13 @@
 import logo from '../assets/FISlogo.png';
+import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf';
 
 const quickLinks = [
-  'Fish Landing Statistics',
-  'Vessel Registration Portal',
-  'Licensing & Permits',
-  'Research Grants',
-  'Fisheries Act 2026',
-  'Marine Protected Areas',
+  { label: 'Fish Landing Statistics', href: '#' },
+  { label: 'Vessel Registration and Management', href: 'https://fisheriesdept.gov.lk/regulations/', external: true },
+  { label: 'Licensing & Permits', href: '#' },
+  { label: 'Research Grants', href: '#' },
+  { label: 'Fisheries Act 2016', href: fishingActPdf, external: true },
+  { label: 'Marine Protected Areas', href: '#' },
 ];
 
 export default function FISFooter({ onNavigate }) {
@@ -39,10 +40,10 @@ export default function FISFooter({ onNavigate }) {
           <h3 className="border-b border-white/10 pb-3 text-xl font-bold text-white">Quick Links</h3>
           <ul className="mt-4 space-y-3">
             {quickLinks.map((item) => (
-              <li key={item}>
-                <a href="#" className="flex items-center gap-2 text-[13px] text-white/70 transition hover:text-white">
+              <li key={item.label}>
+                <a href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noreferrer' : undefined} className="flex items-center gap-2 text-[13px] text-white/70 transition hover:text-white">
                   <span className="text-[#f4b740]">›</span>
-                  <span>{item}</span>
+                  <span>{item.label}</span>
                 </a>
               </li>
             ))}

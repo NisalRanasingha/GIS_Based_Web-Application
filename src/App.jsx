@@ -6,19 +6,15 @@ import AdminDashboard from './components/AdminDashboard';
 import FISHomePage from './pages/FISHomePage';
 import FISContactPage from './pages/FISContactPage';
 import FISSectionPage from './pages/FISSectionPage';
+import AdminInquiriesPage from './pages/AdminInquiriesPage';
+import AdminNewsPage from './pages/AdminNewsPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import NewsPage from './pages/NewsPage';
 
 const sectionPages = {
   services: {
     title: 'Services',
-    description: 'Explore the information, research, and advisory services provided by the Fisheries Information Center.',
-  },
-  research: {
-    title: 'Research',
-    description: 'Discover research programs and scientific findings supporting Sri Lanka\'s aquatic resources.',
-  },
-  publications: {
-    title: 'Publications',
-    description: 'Browse reports, journals, statistics, and technical publications from NARA.',
+    description: 'Explore the information and advisory services provided by the Fisheries Information Center.',
   },
   news: {
     title: 'News & Events',
@@ -34,13 +30,15 @@ const pagePaths = {
   about: '/about',
   contact: '/contact',
   services: '/services',
-  research: '/research',
-  publications: '/publications',
   news: '/news',
+  adminInquiries: '/admin/inquiries',
+  adminNews: '/admin/news',
+  admin: '/admin',
 };
 
 const pageFromPath = (pathname) => {
-  const page = Object.keys(pagePaths).find((key) => pagePaths[key] === pathname);
+  const normalizedPath = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+  const page = Object.keys(pagePaths).find((key) => pagePaths[key] === normalizedPath);
   return page || 'home';
 };
 
@@ -116,6 +114,10 @@ function App() {
   }
   if (page === 'about') return <About onNavigate={handleNavigate} />;
   if (page === 'contact') return <FISContactPage onNavigate={handleNavigate} />;
+  if (page === 'adminInquiries') return <AdminInquiriesPage onNavigate={handleNavigate} />;
+  if (page === 'adminNews') return <AdminNewsPage onNavigate={handleNavigate} />;
+  if (page === 'admin') return <AdminDashboardPage onNavigate={handleNavigate} />;
+  if (page === 'news') return <NewsPage onNavigate={handleNavigate} />;
   if (sectionPages[page]) return <FISSectionPage page={page} {...sectionPages[page]} onNavigate={handleNavigate} />;
 
   return <FISHomePage onNavigate={handleNavigate} />;
