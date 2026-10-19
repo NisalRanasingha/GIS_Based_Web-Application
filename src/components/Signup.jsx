@@ -9,11 +9,12 @@ function Signup({ onNavigate }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    const form = event.currentTarget
     setError('')
     setSubmitted(false)
     setIsSubmitting(true)
 
-    const formData = new FormData(event.currentTarget)
+    const formData = new FormData(form)
     const payload = Object.fromEntries(formData.entries())
 
     try {
@@ -29,7 +30,7 @@ function Signup({ onNavigate }) {
       }
 
       setSubmitted(true)
-      event.currentTarget.reset()
+      form.reset()
     } catch (requestError) {
       setError(requestError.message || 'Unable to create your account.')
     } finally {
