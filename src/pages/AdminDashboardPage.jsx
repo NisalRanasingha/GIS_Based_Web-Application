@@ -54,25 +54,32 @@ export default function AdminDashboardPage({ currentUser, onNavigate, onLogout }
       <aside className="dashboard-sidebar">
         <a className="dashboard-brand" href="/admin">
           <img src={logo} alt="" />
-          <span><strong>FIS Admin</strong><small>Fisheries Information Center</small></span>
+          <span><strong>Receh<span>FIS</span></strong><small>Admin workspace</small></span>
         </a>
+        <p className="dashboard-nav-label">Workspace</p>
         <nav className="dashboard-nav" aria-label="Admin navigation">
-          <a className="active" href="/admin" onClick={(event) => navigate(event, 'admin')}><span>▦</span>Overview</a>
-            <a href="/admin/inquiries" onClick={(event) => navigate(event, 'adminInquiries')}><span>✉</span>Inquiries{stats.new > 0 && <b>{stats.new}</b>}</a>
-            <a href="/admin/news" onClick={(event) => navigate(event, 'adminNews')}><span>✦</span>News &amp; events</a>
+          <a className="active" href="/admin" onClick={(event) => navigate(event, 'admin')}><span>⌂</span>Overview</a>
+          <a href="/admin/inquiries" onClick={(event) => navigate(event, 'adminInquiries')}><span>◫</span>Inquiries{stats.new > 0 && <b>{stats.new}</b>}</a>
+          <a href="/admin/news" onClick={(event) => navigate(event, 'adminNews')}><span>✦</span>News &amp; events</a>
+          <p className="dashboard-nav-label secondary">General</p>
           <a href="/" target="_blank" rel="noreferrer"><span>↗</span>View public site</a>
         </nav>
-        <div className="dashboard-sidebar-footer"><span className="dashboard-online" />System operational<button type="button" onClick={onLogout}>Sign out</button></div>
+        <div className="dashboard-sidebar-footer">
+          <div className="dashboard-profile"><span className="dashboard-profile-avatar">{currentUser?.first_name?.charAt(0) || 'A'}</span><span><strong>{currentUser?.first_name || 'Admin'}</strong><small>Administrator</small></span><b>•••</b></div>
+          <span className="dashboard-online" />System operational
+          <button type="button" onClick={onLogout}>Sign out <span>↗</span></button>
+        </div>
       </aside>
 
       <section className="dashboard-main">
         <header className="dashboard-header">
-          <div><p className="dashboard-eyebrow">Administration / Overview</p><h1>Good morning, {currentUser?.first_name || 'Admin'}</h1><p>Here&apos;s what is happening across the information center today.</p></div>
-          <button type="button" className="dashboard-refresh" onClick={loadDashboard} disabled={isLoading}>↻ <span>{isLoading ? 'Refreshing...' : 'Refresh data'}</span></button>
+          <div><p className="dashboard-eyebrow">Overview</p><h1>Good morning, {currentUser?.first_name || 'Admin'} <span>✦</span></h1><p>Here&apos;s what is happening across the information center today.</p></div>
+          <div className="dashboard-header-actions"><button type="button" className="dashboard-search" aria-label="Search">⌕</button><button type="button" className="dashboard-notification" aria-label="Notifications">♢<i /></button><button type="button" className="dashboard-refresh" onClick={loadDashboard} disabled={isLoading}>↻ <span>{isLoading ? 'Refreshing...' : 'Refresh data'}</span></button></div>
         </header>
 
         {error && <div className="dashboard-alert">{error}</div>}
 
+        <div className="dashboard-section-heading"><div><span>Performance</span><h2>Information center activity</h2></div><button type="button">This week⌄</button></div>
         <div className="dashboard-stat-grid">
           <article className="dashboard-stat-card teal"><span className="stat-icon">✉</span><div><small>Total inquiries</small><strong>{stats.total ?? '—'}</strong><em>All submitted messages</em></div></article>
           <article className="dashboard-stat-card gold"><span className="stat-icon">!</span><div><small>Needs review</small><strong>{stats.new ?? '—'}</strong><em>New messages waiting</em></div></article>
@@ -81,6 +88,10 @@ export default function AdminDashboardPage({ currentUser, onNavigate, onLogout }
         </div>
 
         <div className="dashboard-content-grid">
+          <section className="dashboard-panel activity-panel chart-panel">
+            <div className="dashboard-panel-heading"><div><span>Inquiries overview</span><h2>Message volume</h2></div><span className="chart-legend"><i /> Received <i /> Resolved</span></div>
+            <div className="dashboard-chart"><div className="chart-y-axis"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div><div className="chart-plot"><div className="chart-gridlines"><i /><i /><i /><i /><i /></div><svg viewBox="0 0 700 230" role="img" aria-label="Message volume trend"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#a744ff" stopOpacity=".32" /><stop offset="1" stopColor="#a744ff" stopOpacity="0" /></linearGradient></defs><path className="chart-area" d="M0 178 C50 145 70 160 115 145 S175 115 220 135 S280 90 330 112 S390 150 440 112 S505 96 550 72 S625 82 700 38 L700 230 L0 230Z" /><path className="chart-line purple" d="M0 178 C50 145 70 160 115 145 S175 115 220 135 S280 90 330 112 S390 150 440 112 S505 96 550 72 S625 82 700 38" /><path className="chart-line cyan" d="M0 195 C55 180 78 185 115 177 S172 150 220 170 S280 132 330 152 S397 169 440 140 S510 130 550 110 S620 123 700 80" /></svg><div className="chart-x-axis"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div></div>
+          </section>
           <section className="dashboard-panel activity-panel">
             <div className="dashboard-panel-heading"><div><span>Inbox activity</span><h2>Recent inquiries</h2></div><a href="/admin/inquiries" onClick={(event) => navigate(event, 'adminInquiries')}>View all <b>→</b></a></div>
             {recentInquiries.length === 0 ? <div className="dashboard-empty">No inquiries have been submitted yet.</div> : <div className="dashboard-activity-list">{recentInquiries.map((inquiry) => <a className="dashboard-activity-row" href="/admin/inquiries" onClick={(event) => navigate(event, 'adminInquiries')} key={inquiry.id}><span className={`activity-avatar ${inquiry.priority}`}>{inquiry.full_name?.charAt(0) || '?'}</span><span className="activity-copy"><strong>{inquiry.subject}</strong><small>{inquiry.full_name} · {formatDate(inquiry.created_at)}</small></span><span className={`dashboard-status ${inquiry.status}`}>{statusLabels[inquiry.status] || inquiry.status}</span><b className="row-arrow">›</b></a>)}</div>}

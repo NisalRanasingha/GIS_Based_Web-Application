@@ -30,3 +30,14 @@
 .news-admin-copy .danger { color: #c1515f; }
 @media (max-width: 850px) { .news-admin-header { align-items: start; flex-direction: column; } .news-admin-grid { grid-template-columns: 1fr; } }
 @media (max-width: 520px) { .form-row { grid-template-columns: 1fr; gap: 0; } .news-admin-item { flex-direction: column; } .news-thumb { width: 100%; height: 150px; } }
+
+/* Shared RecehTok dashboard theme for the news workspace. */
+.news-admin { min-height: 100vh; padding: 38px clamp(20px, 4vw, 58px) 64px; background: #0e0d24; color: #f4f2ff; }
+.news-admin-header, .news-admin-grid { width: min(1320px, 100%); }
+.news-admin-header { margin-bottom: 30px; }.news-admin-kicker, .form-heading span, .list-heading span { color: #9b54f6; font-size: 9px; letter-spacing: .18em; }.news-admin h1 { margin: 8px 0 6px; color: #fff; font-size: clamp(30px, 3.4vw, 39px); }.news-admin-header p { color: #78758f; font-size: 13px; }
+.news-header-actions { gap: 12px; }.news-refresh, .cancel-edit { border-color: #342c58; border-radius: 8px; background: #211a3d; color: #c4a9ff; padding: 10px 13px; font-size: 11px; }.news-feedback { background: rgba(81,218,157,.14); color: #6ce5ae; }
+.news-admin-grid { gap: 18px; }.news-form, .news-list-panel { border-color: #292545; border-radius: 10px; background: #17152f; box-shadow: 0 14px 35px rgba(0,0,0,.18); }.form-heading, .list-heading { border-color: #262241; }.form-heading h2, .list-heading h2 { color: #f5f2ff; font-size: 17px; }
+.news-form label { color: #aaa6c4; font-size: 11px; }.news-form input, .news-form textarea { border-color: #2e294d; border-radius: 8px; background: #121027; color: #ddd9ee; }.news-form input::placeholder, .news-form textarea::placeholder { color: #625d79; }.news-form input:focus, .news-form textarea:focus { border-color: #a744ff; box-shadow: 0 0 0 3px rgba(167,68,255,.14); }
+.publish-button { border-radius: 8px; background: linear-gradient(90deg,#854fff,#d74bb4); }.publish-button:hover { background: linear-gradient(90deg,#9b54f6,#e45cc1); }
+.news-empty { color: #77738f; }.news-admin-list { gap: 14px; }.news-admin-item { border-color: #292545; }.news-thumb { background: linear-gradient(135deg,#5737a5,#d74baf); color: #f2d7ff; }.news-admin-copy > span { color: #a96aff; font-size: 9px; }.news-admin-copy h3 { color: #ddd9ee; font-size: 15px; }.news-admin-copy p { color: #77738f; }.news-admin-copy button { color: #b06cff; }.news-admin-copy .danger { color: #f267bd; }
+@media (max-width: 850px) { .news-admin-header { align-items: flex-start; } }
