@@ -7,6 +7,8 @@
 .forecast-species-card span, .forecast-species-card strong { display: block; }
 .forecast-species-card span { color: #718696; font-size: .7rem; }
 .forecast-species-card strong { margin-top: 2px; color: #123d7b; font-size: .88rem; text-transform: capitalize; }
+.forecast-species-card label { display: grid; gap: 5px; }
+.forecast-species-card select { min-width: 150px; border: 1px solid #b9ccd8; border-radius: 7px; padding: 7px 9px; color: #123d7b; background: #f7fbfd; font-size: .82rem; }
 .forecast-map-stat { display: grid; gap: 2px; padding: 0 14px; border-left: 1px solid #dfeaf0; }
 .forecast-map-stat span { color: #718696; font-size: .72rem; }
 .forecast-map-stat strong { color: #0a6d7b; font-size: 1rem; }

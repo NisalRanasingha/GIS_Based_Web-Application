@@ -57,10 +57,10 @@ export default function FishForecastPage({ onNavigate, currentUser, onLogout, em
           <div className="fish-forecast-hero-badge"><span>LIVE MODEL</span><strong>7-day view</strong><small>Updated by NARA analysts</small></div>
         </section>}
         <section className={`fish-forecast-content ${embedded ? 'fish-forecast-content-embedded' : ''}`}>
-          <div className="fish-forecast-heading"><div><p className="forecast-eyebrow">{weeklySummary ? 'Weekly summary' : 'Species selector'}</p><h2>{weeklySummary ? 'Past seven days of forecast areas' : 'Find the water that fits your catch'}</h2><p>Select a species to view its latest ocean-data forecast and past seven days of model output.</p></div><div className="fish-species-tabs">{Object.entries(fishSpecies).map(([key, item]) => <button type="button" className={key === species ? 'active' : ''} key={key} onClick={() => setSpecies(key)}>{item.label}</button>)}{!weeklySummary && <button type="button" className="weekly-summary-button" onClick={() => onNavigate('weeklySummary')}>View weekly summary →</button>}</div></div>
+          <div className="fish-forecast-heading"><div><p className="forecast-eyebrow">{weeklySummary ? 'Weekly summary' : 'Species selector'}</p><h2>{weeklySummary ? 'Past seven days of forecast areas' : 'Find the water that fits your catch'}</h2><p>Select a species from the map toolbar to view its latest ocean-data forecast and past seven days of model output.</p></div>{!weeklySummary && <button type="button" className="weekly-summary-button" onClick={() => onNavigate('weeklySummary')}>View weekly summary →</button>}</div>
           <div className="fish-forecast-model-note"><strong>{activeSpecies.label}</strong><span>{activeSpecies.description}</span><em>{activeSpecies.requirements.length} data layers</em></div>
           {error && <div className="forecast-inline-alert">Live forecast service unavailable. No unprocessed demonstration data is shown.</div>}
-          {isLoading ? <div className="forecast-loading">Loading forecast layers…</div> : <FishForecastMap forecasts={forecasts} species={species} />}
+          {isLoading ? <div className="forecast-loading">Loading forecast layers…</div> : <FishForecastMap forecasts={forecasts} species={species} onSpeciesChange={setSpecies} />}
           <div className="forecast-disclaimer"><strong>Use responsibly</strong><span>Forecast cells indicate relative habitat suitability, not guaranteed catches. Check official weather and safety advisories before sailing.</span></div>
         </section>
       </main>

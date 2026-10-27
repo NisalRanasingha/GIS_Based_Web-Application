@@ -3,6 +3,7 @@ import { CircleMarker, GeoJSON, MapContainer, Polyline, TileLayer, Tooltip, useM
 import yellowfinImage from '../assets/Yellowfin Tuna in Deep Blue Waters.png';
 import bigeyeImage from '../assets/Bigeye Tuna in Deep Blue Waters.png';
 import skipjackImage from '../assets/Skipjack Tuna in Deep Blue Waters.png';
+import { fishSpecies } from '../data/fishForecast';
 import 'leaflet/dist/leaflet.css';
 import './FishForecast.css';
 
@@ -212,7 +213,13 @@ const routeDistanceKm = (route) => route.slice(1).reduce((total, point, index) =
   total + distanceKm(route[index], { lat: point[0], lng: point[1] })
 ), 0);
 
-export default function FishForecastMap({ forecasts = [], compact = false, species = 'yellowfin', localFiles = emptyFiles }) {
+export default function FishForecastMap({
+  forecasts = [],
+  compact = false,
+  species = 'yellowfin',
+  localFiles = emptyFiles,
+  onSpeciesChange,
+}) {
   const [harbour, setHarbour] = useState('Colombo');
   const [selectedId, setSelectedId] = useState(0);
   const [shapes, setShapes] = useState([]);
@@ -265,7 +272,12 @@ export default function FishForecastMap({ forecasts = [], compact = false, speci
         <div className="forecast-map-toolbar">
           <div className="forecast-species-card">
             <img src={speciesImages[species]} alt={`${species} tuna`} />
-            <div><span>Selected species</span><strong>{species} tuna</strong></div>
+            <label>
+              <span>Fish species</span>
+              <select value={species} onChange={(event) => onSpeciesChange?.(event.target.value)}>
+                {Object.entries(fishSpecies).map(([key, item]) => <option value={key} key={key}>{item.label}</option>)}
+              </select>
+            </label>
           </div>
           <label>
             Harbour
