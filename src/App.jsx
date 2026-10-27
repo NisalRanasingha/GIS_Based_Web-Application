@@ -9,6 +9,8 @@ import AdminInquiriesPage from './pages/AdminInquiriesPage';
 import AdminNewsPage from './pages/AdminNewsPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import NewsPage from './pages/NewsPage';
+import FishForecastPage from './pages/FishForecastPage';
+import AdminFishForecastPage from './pages/AdminFishForecastPage';
 
 const sectionPages = {
   services: {
@@ -29,11 +31,14 @@ const pagePaths = {
   about: '/about',
   contact: '/contact',
   services: '/services',
+  fishForecast: '/services/fish-forecast',
+  weeklySummary: '/services/fish-forecast/weekly-summary',
   news: '/news',
   adminInquiries: '/admin/inquiries',
   adminNews: '/admin/news',
+  adminFishForecast: '/admin/fish-forecast',
 };
-const adminPages = new Set(['admin', 'adminInquiries', 'adminNews']);
+const adminPages = new Set(['admin', 'adminInquiries', 'adminNews', 'adminFishForecast']);
 
 const pageFromPath = (pathname) => {
   const normalizedPath = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
@@ -119,12 +124,15 @@ function App() {
     if (page === 'admin') {
       return <AdminDashboardPage currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} />;
     }
+    if (page === 'adminFishForecast') return <AdminFishForecastPage currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} />;
     if (page === 'adminInquiries') return <AdminInquiriesPage onNavigate={handleNavigate} />;
     return <AdminNewsPage onNavigate={handleNavigate} />;
   }
   if (page === 'about') return <About onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
   if (page === 'contact') return <FISContactPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
   if (page === 'news') return <NewsPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
+  if (page === 'fishForecast') return <FishForecastPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
+  if (page === 'weeklySummary') return <FishForecastPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} weeklySummary />;
   if (sectionPages[page]) {
     return <FISSectionPage page={page} {...sectionPages[page]} onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
   }

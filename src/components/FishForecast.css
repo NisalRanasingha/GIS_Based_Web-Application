@@ -1,0 +1,28 @@
+.forecast-map-shell { position: relative; z-index: 0; isolation: isolate; overflow: hidden; border: 1px solid #c9dbe5; border-radius: 18px; background: #fff; box-shadow: 0 12px 30px rgba(16, 61, 93, .08); }
+.forecast-map-toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 18px; padding: 18px 20px; border-bottom: 1px solid #dfeaf0; }
+.forecast-map-toolbar label { display: grid; gap: 6px; color: #536b7d; font-size: .73rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.forecast-map-toolbar select { min-width: 180px; border: 1px solid #b9ccd8; border-radius: 8px; padding: 9px 12px; color: #123d7b; background: #f7fbfd; font-size: .9rem; text-transform: none; letter-spacing: normal; }
+.forecast-species-card { display: flex; align-items: center; gap: 9px; min-width: 190px; }
+.forecast-species-card img { width: 52px; height: 42px; border-radius: 7px; object-fit: cover; }
+.forecast-species-card span, .forecast-species-card strong { display: block; }
+.forecast-species-card span { color: #718696; font-size: .7rem; }
+.forecast-species-card strong { margin-top: 2px; color: #123d7b; font-size: .88rem; text-transform: capitalize; }
+.forecast-map-stat { display: grid; gap: 2px; padding: 0 14px; border-left: 1px solid #dfeaf0; }
+.forecast-map-stat span { color: #718696; font-size: .72rem; }
+.forecast-map-stat strong { color: #0a6d7b; font-size: 1rem; }
+.forecast-timeline { display: flex; gap: 7px; overflow-x: auto; padding: 12px 20px 2px; }
+.forecast-timeline button { min-width: 78px; border: 1px solid #d6e3e9; border-radius: 9px; padding: 7px; background: #f7fbfd; color: #637989; font-size: .72rem; }
+.forecast-timeline button strong, .forecast-timeline button span { display: block; }
+.forecast-timeline button strong { margin-top: 2px; color: #123d7b; font-size: .78rem; }
+.forecast-timeline button.active { border-color: #0d6d7d; background: #0d6d7d; color: #dff9f4; }
+.forecast-timeline button.active strong { color: #fff; }
+.forecast-map { height: 480px; }
+.forecast-map .leaflet-container { height: 100%; width: 100%; background: #dcecf2; }
+.forecast-map-note { margin: 0; padding: 12px 20px 17px; color: #6b7f8e; font-size: .8rem; line-height: 1.5; }
+.forecast-area-details { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 14px 20px; border-top: 1px solid #dfeaf0; background: #f7fbfd; }
+.forecast-area-details div { display: grid; gap: 3px; min-width: 0; }
+.forecast-area-details span { color: #718696; font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.forecast-area-details strong { overflow: hidden; color: #123d7b; font-size: .86rem; text-overflow: ellipsis; white-space: nowrap; }
+.admin-preview-legend .high { background: #d62828; }
+.forecast-map-shell-compact .forecast-map { height: 300px; }
+@media (max-width: 640px) { .forecast-map-toolbar { align-items: stretch; } .forecast-map-stat { border-left: 0; border-top: 1px solid #dfeaf0; padding: 10px 0 0; } .forecast-map { height: 380px; } .forecast-area-details { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

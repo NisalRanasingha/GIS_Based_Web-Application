@@ -61,6 +61,7 @@ export default function AdminDashboardPage({ currentUser, onNavigate, onLogout }
           <a className="active" href="/admin" onClick={(event) => navigate(event, 'admin')}><span>⌂</span>Overview</a>
           <a href="/admin/inquiries" onClick={(event) => navigate(event, 'adminInquiries')}><span>◫</span>Inquiries{stats.new > 0 && <b>{stats.new}</b>}</a>
           <a href="/admin/news" onClick={(event) => navigate(event, 'adminNews')}><span>✦</span>News &amp; events</a>
+          <a href="/admin/fish-forecast" onClick={(event) => navigate(event, 'adminFishForecast')}><span>◉</span>Fish forecasting</a>
           <p className="dashboard-nav-label secondary">General</p>
           <a href="/" target="_blank" rel="noreferrer"><span>↗</span>View public site</a>
         </nav>
@@ -99,7 +100,7 @@ export default function AdminDashboardPage({ currentUser, onNavigate, onLogout }
 
           <section className="dashboard-panel quick-panel">
             <div className="dashboard-panel-heading"><div><span>Shortcuts</span><h2>Quick actions</h2></div></div>
-            <div className="dashboard-quick-actions"><a href="/admin/news" onClick={(event) => navigate(event, 'adminNews')}><span className="quick-icon teal-icon">✦</span><span><strong>Publish an update</strong><small>Share news or an advisory</small></span><b>→</b></a><a href="/admin/inquiries" onClick={(event) => navigate(event, 'adminInquiries')}><span className="quick-icon blue-icon">✉</span><span><strong>Review inbox</strong><small>Manage incoming requests</small></span><b>→</b></a><a href="/" target="_blank" rel="noreferrer"><span className="quick-icon gold-icon">↗</span><span><strong>Open public website</strong><small>Preview the visitor experience</small></span><b>→</b></a></div>
+            <div className="dashboard-quick-actions"><a href="/admin/fish-forecast" onClick={(event) => navigate(event, 'adminFishForecast')}><span className="quick-icon teal-icon">◉</span><span><strong>Create fish forecast</strong><small>Upload today&apos;s ocean layers</small></span><b>→</b></a><a href="/admin/news" onClick={(event) => navigate(event, 'adminNews')}><span className="quick-icon teal-icon">✦</span><span><strong>Publish an update</strong><small>Share news or an advisory</small></span><b>→</b></a><a href="/admin/inquiries" onClick={(event) => navigate(event, 'adminInquiries')}><span className="quick-icon blue-icon">✉</span><span><strong>Review inbox</strong><small>Manage incoming requests</small></span><b>→</b></a><a href="/" target="_blank" rel="noreferrer"><span className="quick-icon gold-icon">↗</span><span><strong>Open public website</strong><small>Preview the visitor experience</small></span><b>→</b></a></div>
           </section>
         </div>
 

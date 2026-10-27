@@ -10,6 +10,16 @@ FRONTEND_URL=http://localhost:5173
 ```
 
 Start the backend from `FIS_Backend` with `npm start`, then open the frontend at `http://localhost:5173/admin/inquiries`. The dashboard supports searching, status and priority filters, status/priority updates, internal notes, email replies, refresh, and deletion.
+
+## Fish forecast maps
+
+The admin fish-forecast page supports uploading one or more `.shp` fishing-area
+files for each supported species, staging them in the database, and publishing
+the selected map. Published maps are served to both the admin preview and the
+public fish-forecast page, where users can select a harbour and a forecast area
+to calculate the shortest sea-route distance. A published map remains active
+until a newer map is published for that species; staged files that are never
+published are cleaned up after eight days.
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

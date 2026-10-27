@@ -3,9 +3,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import multer from 'multer';
+import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { z } from 'zod';
-import { initializeDatabase, pool } from './db.js';
+import { deleteExpiredForecastFiles, initializeDatabase, pool } from './db.js';
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'nara-secret-key';
@@ -91,6 +96,40 @@ const newsSchema = z.object({
 });
 
 const newsUpdateSchema = newsSchema.partial().refine((value) => Object.keys(value).length > 0, 'At least one field is required.');
+const requiredForecastFiles = {
+  yellowfin: ['temperature', 'height', 'depth', ...Array.from({ length: 7 }, (_, index) => `chlorophyll_${index + 1}`)],
+  bigeye: ['salinity', 'temperature', 'oxygen', ...Array.from({ length: 7 }, (_, index) => `chlorophyll_${index + 1}`)],
+  skipjack: ['temperature', 'salinity']
+};
+const shapeTables = {
+  yellowfin: 'yellowfin_forecast_shapes',
+  bigeye: 'bigeye_forecast_shapes',
+  skipjack: 'skipjack_forecast_shapes'
+};
+const forecastUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { files: 20, fileSize: 500 * 1024 * 1024 }
+});
+function processForecastData(files) {
+  const directory = mkdtempSync(join(tmpdir(), 'nara-forecast-'));
+  try {
+    const paths = files.map((file) => {
+      const path = join(directory, `${file.fieldname}.nc`);
+      writeFileSync(path, file.buffer);
+      return path;
+    });
+    const script = join(process.cwd(), 'src', 'forecast_processor.py');
+    const output = execFileSync(process.env.PYTHON_EXECUTABLE || 'python', [script, ...paths], {
+      encoding: 'utf8',
+      maxBuffer: 1024 * 1024 * 4
+    });
+    const result = JSON.parse(output);
+    if (result.error) throw new Error(result.error);
+    return result;
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
 const hashPassword = (password, salt = randomBytes(16).toString('hex')) => {
   const passwordHash = scryptSync(password, salt, 64).toString('hex');
   return `${salt}:${passwordHash}`;
@@ -237,6 +276,258 @@ app.delete('/api/admin/news/:id', async (req, res, next) => {
     res.json({ success: true, message: 'News item deleted.' });
   } catch (error) {
     next(error);
+  }
+});
+
+app.get('/api/fish-forecasts', async (req, res, next) => {
+  try {
+    const species = req.query.species ? z.enum(['yellowfin', 'bigeye', 'skipjack']).parse(req.query.species) : null;
+    const speciesToLoad = species ? [species] : Object.keys(shapeTables);
+    const forecasts = [];
+    for (const currentSpecies of speciesToLoad) {
+      const result = await pool.query(
+        `SELECT MIN(s.id) AS id, $1::text AS species, p.forecast_date, 100 AS confidence,
+                p.published_at AS created_at,
+                '[]'::jsonb AS hotspots
+         FROM fish_forecast_publications p
+         JOIN ${shapeTables[currentSpecies]} s
+           ON s.forecast_date = p.forecast_date
+          AND s.status = 'published'
+         WHERE p.species = $1
+         GROUP BY p.forecast_date, p.published_at`,
+        [currentSpecies]
+      );
+      forecasts.push(...result.rows);
+    }
+    forecasts.sort((left, right) => String(right.forecast_date).localeCompare(String(left.forecast_date)));
+    res.json({ success: true, forecasts });
+  } catch (error) {
+    if (error.name === 'ZodError') return res.status(400).json({ success: false, message: 'Invalid fish species.' });
+    next(error);
+  }
+});
+
+app.get('/api/fish-forecast-shapes/:species', async (req, res, next) => {
+  try {
+    const species = z.enum(['yellowfin', 'bigeye', 'skipjack']).parse(req.params.species);
+    const table = shapeTables[species];
+    const result = await pool.query(
+      `      SELECT s.id, s.forecast_date, s.original_name, s.mime_type, s.content
+       FROM ${table} s
+       JOIN fish_forecast_publications p
+         ON p.species = $1 AND p.forecast_date = s.forecast_date
+       WHERE s.status = 'published'
+       ORDER BY s.uploaded_at ASC`,
+      [species]
+    );
+    if (!result.rowCount) return res.status(404).json({ success: false, message: 'No fishing area shapefile is published for this species.' });
+    res.json({
+      success: true,
+      shapes: result.rows.map((shape) => ({
+        id: shape.id,
+        forecast_date: shape.forecast_date,
+        original_name: shape.original_name,
+        mime_type: shape.mime_type,
+        content: shape.content.toString('base64')
+      }))
+    });
+  } catch (error) {
+    if (error.name === 'ZodError') return res.status(400).json({ success: false, message: 'Invalid fish species.' });
+    next(error);
+  }
+});
+
+app.post('/api/admin/fish-forecast-shapes', forecastUpload.any(), async (req, res, next) => {
+  const client = await pool.connect();
+  try {
+    const species = z.enum(['yellowfin', 'bigeye', 'skipjack']).parse(req.body.species);
+    const forecastDate = z.string().date().parse(req.body.forecastDate);
+    const shapes = (req.files || []).filter((file) => file.originalname.toLowerCase().endsWith('.shp'));
+    if (!shapes.length) {
+      return res.status(400).json({ success: false, message: 'Upload at least one .shp polygon file for the selected species.' });
+    }
+    const table = shapeTables[species];
+
+    await client.query('BEGIN');
+    await client.query(`DELETE FROM ${table} WHERE forecast_date = $1::date AND status = 'uploaded'`, [forecastDate]);
+    const savedFiles = [];
+    for (const shape of shapes) {
+      const saved = await client.query(
+        `INSERT INTO ${table} (forecast_date, original_name, mime_type, content, status, expires_at)
+         VALUES ($1::date, $2, $3, $4, 'uploaded', NOW() + INTERVAL '8 days')
+         RETURNING id, original_name`,
+        [forecastDate, shape.originalname, shape.mimetype, shape.buffer]
+      );
+      savedFiles.push(saved.rows[0]);
+    }
+    await client.query('COMMIT');
+    res.status(201).json({ success: true, species, forecast_date: forecastDate, file_count: shapes.length, files: savedFiles, status: 'uploaded' });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    if (error.name === 'ZodError') return res.status(400).json({ success: false, message: 'Invalid species or forecast date.' });
+    next(error);
+  } finally {
+    client.release();
+  }
+});
+
+app.delete('/api/admin/fish-forecast-shapes/:species/:id', async (req, res, next) => {
+  try {
+    const species = z.enum(['yellowfin', 'bigeye', 'skipjack']).parse(req.params.species);
+    const shapeId = z.coerce.number().int().positive().parse(req.params.id);
+    const result = await pool.query(
+      `DELETE FROM ${shapeTables[species]} WHERE id = $1 AND status = 'uploaded' RETURNING id`,
+      [shapeId]
+    );
+    if (!result.rowCount) return res.status(404).json({ success: false, message: 'Staged shapefile was not found or is already published.' });
+    res.json({ success: true, id: shapeId });
+  } catch (error) {
+    if (error.name === 'ZodError') return res.status(400).json({ success: false, message: 'Invalid species or shapefile.' });
+    next(error);
+  }
+});
+
+app.post('/api/admin/fish-forecast-shapes/publish', async (req, res, next) => {
+  const client = await pool.connect();
+  try {
+    const species = z.enum(['yellowfin', 'bigeye', 'skipjack']).parse(req.body.species);
+    const forecastDate = z.string().date().parse(req.body.forecastDate);
+    const table = shapeTables[species];
+    await client.query('BEGIN');
+    const result = await client.query(
+      `UPDATE ${table}
+       SET status = 'published', published_at = NOW(), expires_at = NULL
+       WHERE forecast_date = $1::date AND status = 'uploaded'
+       RETURNING id`,
+      [forecastDate]
+    );
+    if (!result.rowCount) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ success: false, message: 'Add shapefiles before publishing this forecast.' });
+    }
+    await client.query(
+      `INSERT INTO fish_forecast_publications (species, forecast_date, published_at, updated_at)
+       VALUES ($1, $2::date, NOW(), NOW())
+       ON CONFLICT (species) DO UPDATE
+       SET forecast_date = EXCLUDED.forecast_date,
+           published_at = EXCLUDED.published_at,
+           updated_at = NOW()`,
+      [species, forecastDate]
+    );
+    await client.query('COMMIT');
+    res.json({ success: true, species, forecast_date: forecastDate, file_count: result.rowCount, status: 'published' });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    if (error.name === 'ZodError') return res.status(400).json({ success: false, message: 'Invalid species or forecast date.' });
+    next(error);
+  } finally {
+    client.release();
+  }
+});
+
+app.get('/api/admin/fish-forecasts', async (_req, res, next) => {
+  try {
+    const result = await pool.query(
+      `SELECT r.id, r.species, r.forecast_date, r.status, r.confidence,
+              r.processing_error, r.created_at, r.processed_at,
+              COUNT(DISTINCT f.id)::int AS file_count, COUNT(DISTINCT h.id)::int AS hotspot_count
+       FROM fish_forecast_runs r
+       LEFT JOIN fish_forecast_files f ON f.run_id = r.id
+       LEFT JOIN fish_forecast_hotspots h ON h.run_id = r.id
+       GROUP BY r.id
+       ORDER BY r.forecast_date DESC, r.created_at DESC`
+    );
+    res.json({ success: true, forecasts: result.rows });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/api/admin/fish-forecasts', forecastUpload.any(), async (req, res, next) => {
+  const client = await pool.connect();
+  let runId;
+  let uploadCommitted = false;
+  try {
+    const species = z.enum(['yellowfin', 'bigeye', 'skipjack']).parse(req.body.species);
+    const forecastDate = z.string().date().parse(req.body.forecastDate);
+    const files = req.files || [];
+    const fileMap = new Map(files.map((file) => [file.fieldname, file]));
+    const missing = requiredForecastFiles[species].filter((key) => !fileMap.has(key));
+    if (missing.length) {
+      return res.status(400).json({ success: false, message: `Missing required layer files: ${missing.join(', ')}.` });
+    }
+
+    await client.query('BEGIN');
+    const runResult = await client.query(
+      `INSERT INTO fish_forecast_runs (species, forecast_date, status)
+       VALUES ($1, $2::date, 'uploaded')
+       ON CONFLICT (species, forecast_date)
+       DO UPDATE SET status = 'uploaded', confidence = NULL, processing_error = NULL,
+         created_at = NOW(), processed_at = NULL
+       RETURNING id, species, forecast_date`,
+      [species, forecastDate]
+    );
+    const run = runResult.rows[0];
+    runId = run.id;
+    await client.query('DELETE FROM fish_forecast_files WHERE run_id = $1', [run.id]);
+    await client.query('DELETE FROM fish_forecast_hotspots WHERE run_id = $1', [run.id]);
+
+    for (const layerKey of requiredForecastFiles[species]) {
+      const file = fileMap.get(layerKey);
+      await client.query(
+        `INSERT INTO fish_forecast_files
+          (run_id, layer_key, original_name, mime_type, file_size, checksum_sha256, content)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [run.id, layerKey, file.originalname, file.mimetype, file.size, createHash('sha256').update(file.buffer).digest('hex'), file.buffer]
+      );
+    }
+
+    await client.query('COMMIT');
+    uploadCommitted = true;
+    await client.query('BEGIN');
+    await client.query(`UPDATE fish_forecast_runs SET status = 'processing' WHERE id = $1`, [run.id]);
+    const processed = processForecastData(files);
+    const hotspots = processed.hotspots;
+    for (const hotspot of hotspots) {
+      await client.query(
+        `INSERT INTO fish_forecast_hotspots
+           (run_id, latitude, longitude, suitability_score, label, environmental_data)
+         VALUES ($1, $2, $3, $4, $5, $6::jsonb)`,
+        [run.id, hotspot.lat, hotspot.lng, hotspot.score, hotspot.label, JSON.stringify({
+         temperature: hotspot.temperature,
+         chlorophyll: hotspot.chlorophyll,
+         height: hotspot.height,
+         depth: hotspot.depth,
+         chlorophyll_trend: hotspot.chlorophyll_trend,
+         cell_size: hotspot.cell_size
+        })]
+      );
+    }
+    if (!hotspots.length) throw new Error('No valid offshore cells were found in the uploaded data coverage.');
+    const confidence = Math.min(96, 60 + Math.min(30, processed.candidate_count / 10));
+    const finalResult = await client.query(
+      `UPDATE fish_forecast_runs
+       SET status = 'processed', confidence = $2, processed_at = NOW()
+       WHERE id = $1
+       RETURNING id, species, forecast_date, status, confidence, created_at, processed_at`,
+      [run.id, confidence]
+    );
+    await client.query('COMMIT');
+    res.status(201).json({ success: true, forecast: { ...finalResult.rows[0], hotspots } });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    if (uploadCommitted && runId) {
+      await pool.query(
+        `UPDATE fish_forecast_runs
+         SET status = 'failed', processing_error = $2
+         WHERE id = $1`,
+        [runId, error.message || 'Forecast processing failed.']
+      );
+    }
+    if (error.name === 'ZodError') return res.status(400).json({ success: false, message: 'Invalid species or forecast date.' });
+    next(error);
+  } finally {
+    client.release();
   }
 });
 
@@ -475,6 +766,7 @@ app.delete('/api/admin/inquiries/:id', async (req, res, next) => {
 });
 
 app.use((error, _req, res, _next) => {
+  void _next;
   console.error(error);
   res.status(500).json({
     success: false,
@@ -487,6 +779,13 @@ const port = process.env.PORT || 5000;
 initializeDatabase()
   .then(async () => {
     await ensureAdminUser();
+    await deleteExpiredForecastFiles();
+    const cleanupInterval = setInterval(() => {
+      void deleteExpiredForecastFiles().catch((error) => {
+        console.error('Unable to delete expired fish forecast files.', error);
+      });
+    }, 60 * 60 * 1000);
+    cleanupInterval.unref();
     app.listen(port, () => {
       console.log(`NARA backend running on port ${port}`);
     });
