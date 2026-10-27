@@ -317,6 +317,7 @@ app.get('/api/fish-forecast-shapes/:species', async (req, res, next) => {
        JOIN fish_forecast_publications p
          ON p.species = $1 AND p.forecast_date = s.forecast_date
        WHERE s.status = 'published'
+         AND s.expires_at > NOW()
        ORDER BY s.uploaded_at ASC`,
       [species]
     );
@@ -396,7 +397,7 @@ app.post('/api/admin/fish-forecast-shapes/publish', async (req, res, next) => {
     await client.query('BEGIN');
     const result = await client.query(
       `UPDATE ${table}
-       SET status = 'published', published_at = NOW(), expires_at = NULL
+       SET status = 'published', published_at = NOW()
        WHERE forecast_date = $1::date AND status = 'uploaded'
        RETURNING id`,
       [forecastDate]

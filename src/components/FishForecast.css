@@ -18,6 +18,8 @@
 .forecast-timeline button.active strong { color: #fff; }
 .forecast-map { height: 480px; }
 .forecast-map .leaflet-container { height: 100%; width: 100%; background: #dcecf2; }
+.forecast-map .leaflet-tooltip { border: 0; border-radius: 5px; background: #123d7b; color: #fff; box-shadow: 0 2px 8px rgba(16, 61, 93, .2); font-size: .72rem; }
+.forecast-map .leaflet-tooltip-top::before { border-top-color: #123d7b; }
 .forecast-map-note { margin: 0; padding: 12px 20px 17px; color: #6b7f8e; font-size: .8rem; line-height: 1.5; }
 .forecast-area-details { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 14px 20px; border-top: 1px solid #dfeaf0; background: #f7fbfd; }
 .forecast-area-details div { display: grid; gap: 3px; min-width: 0; }

@@ -186,9 +186,18 @@ export async function initializeDatabase() {
     UPDATE skipjack_forecast_shapes
     SET expires_at = uploaded_at + INTERVAL '8 days'
     WHERE expires_at IS NULL AND status = 'uploaded';
-    UPDATE yellowfin_forecast_shapes SET expires_at = NULL WHERE status = 'published';
-    UPDATE bigeye_forecast_shapes SET expires_at = NULL WHERE status = 'published';
-    UPDATE skipjack_forecast_shapes SET expires_at = NULL WHERE status = 'published';
+    UPDATE yellowfin_forecast_shapes
+    SET expires_at = uploaded_at + INTERVAL '8 days'
+    WHERE expires_at IS NULL;
+    UPDATE bigeye_forecast_shapes
+    SET expires_at = uploaded_at + INTERVAL '8 days'
+    WHERE expires_at IS NULL;
+    UPDATE skipjack_forecast_shapes
+    SET expires_at = uploaded_at + INTERVAL '8 days'
+    WHERE expires_at IS NULL;
+    ALTER TABLE yellowfin_forecast_shapes ALTER COLUMN expires_at SET NOT NULL;
+    ALTER TABLE bigeye_forecast_shapes ALTER COLUMN expires_at SET NOT NULL;
+    ALTER TABLE skipjack_forecast_shapes ALTER COLUMN expires_at SET NOT NULL;
   `);
   for (const species of ['yellowfin', 'bigeye', 'skipjack']) {
     const table = `${species}_forecast_shapes`;
@@ -230,15 +239,15 @@ export async function deleteExpiredForecastFiles() {
       RETURNING id
     ), deleted_yellowfin AS (
       DELETE FROM yellowfin_forecast_shapes
-      WHERE status = 'uploaded' AND expires_at IS NOT NULL AND expires_at <= NOW()
+      WHERE expires_at IS NOT NULL AND expires_at <= NOW()
       RETURNING id
     ), deleted_bigeye AS (
       DELETE FROM bigeye_forecast_shapes
-      WHERE status = 'uploaded' AND expires_at IS NOT NULL AND expires_at <= NOW()
+      WHERE expires_at IS NOT NULL AND expires_at <= NOW()
       RETURNING id
     ), deleted_skipjack AS (
       DELETE FROM skipjack_forecast_shapes
-      WHERE status = 'uploaded' AND expires_at IS NOT NULL AND expires_at <= NOW()
+      WHERE expires_at IS NOT NULL AND expires_at <= NOW()
       RETURNING id
     )
     SELECT

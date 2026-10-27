@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { GeoJSON, MapContainer, Polyline, TileLayer, Tooltip, useMap } from 'react-leaflet';
+import { CircleMarker, GeoJSON, MapContainer, Polyline, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import yellowfinImage from '../assets/Yellowfin Tuna in Deep Blue Waters.png';
 import bigeyeImage from '../assets/Bigeye Tuna in Deep Blue Waters.png';
 import skipjackImage from '../assets/Skipjack Tuna in Deep Blue Waters.png';
@@ -22,6 +22,8 @@ const speciesImages = {
   bigeye: bigeyeImage,
   skipjack: skipjackImage,
 };
+
+const emptyFiles = [];
 
 const parseShapefile = (buffer) => {
   if (buffer.byteLength < 100) {
@@ -174,9 +176,10 @@ const seaRoute = (from, to) => {
       const point = toPoint(next);
       const currentPoint = toPoint(current);
       const leavesHarbour = current[0] === start[0] && current[1] === start[1];
+      const reachesForecastArea = next[0] === end[0] && next[1] === end[1];
       if (point[0] < minLat || point[0] > maxLat || point[1] < minLng || point[1] > maxLng
-        || isLand(point[0], point[1])
-        || (!leavesHarbour && crossesLand(currentPoint, point))) return;
+        || (!reachesForecastArea && isLand(point[0], point[1]))
+        || (!leavesHarbour && !reachesForecastArea && crossesLand(currentPoint, point))) return;
       const nextKey = key(next[0], next[1]);
       const nextCost = (costs.get(key(current[0], current[1])) || 0) + Math.hypot(rowDelta, columnDelta);
       if (nextCost < (costs.get(nextKey) ?? Infinity)) {
@@ -209,15 +212,14 @@ const routeDistanceKm = (route) => route.slice(1).reduce((total, point, index) =
   total + distanceKm(route[index], { lat: point[0], lng: point[1] })
 ), 0);
 
-export default function FishForecastMap({ forecasts = [], compact = false, species = 'yellowfin', localFiles = [] }) {
+export default function FishForecastMap({ forecasts = [], compact = false, species = 'yellowfin', localFiles = emptyFiles }) {
   const [harbour, setHarbour] = useState('Colombo');
   const [selectedId, setSelectedId] = useState(0);
   const [shapes, setShapes] = useState([]);
-  const [selectedArea, setSelectedArea] = useState(0);
+  const [selectedArea, setSelectedArea] = useState(null);
   const [shapeError, setShapeError] = useState('');
   const forecast = forecasts[selectedId] || forecasts[0];
   const hotspots = forecast?.hotspots || [];
-  const selectedHotspot = hotspots[0];
   const start = harbours[harbour];
   const selectedShape = shapes[selectedArea];
   const areaTarget = useMemo(() => {
@@ -227,9 +229,12 @@ export default function FishForecastMap({ forecasts = [], compact = false, speci
     if (!points.length) return null;
     return points.reduce((result, point) => [result[0] + point[0], result[1] + point[1]], [0, 0]).map((value) => value / points.length);
   }, [selectedShape]);
-  const target = useMemo(() => areaTarget || (selectedHotspot ? [selectedHotspot.lat, selectedHotspot.lng] : null), [areaTarget, selectedHotspot]);
+  const target = areaTarget;
   const route = useMemo(() => target ? seaRoute(start, target) : [], [start, target]);
-  const distance = route.length > 1 ? routeDistanceKm(route) : 0;
+  const distance = selectedShape && target
+    ? (route.length > 1 ? routeDistanceKm(route) : distanceKm(start, { lat: target[0], lng: target[1] }))
+    : 0;
+  const distanceLabel = route.length > 1 ? 'by sea' : 'estimated';
   const cellCount = shapes.length || hotspots.length;
 
   const coverage = useMemo(() => Math.round(forecast?.confidence || 82), [forecast]);
@@ -244,7 +249,7 @@ export default function FishForecastMap({ forecasts = [], compact = false, speci
       .then((loadedShapes) => {
         if (active) {
           setShapes(loadedShapes);
-          setSelectedArea(0);
+          setSelectedArea(null);
           setShapeError('');
         }
       })
@@ -252,7 +257,7 @@ export default function FishForecastMap({ forecasts = [], compact = false, speci
         if (active) setShapeError(error.message);
       });
     return () => { active = false; };
-  }, [forecasts, localFiles, species]);
+  }, [localFiles, species]);
 
   return (
     <div className={`forecast-map-shell ${compact ? 'forecast-map-shell-compact' : ''}`}>
@@ -269,7 +274,7 @@ export default function FishForecastMap({ forecasts = [], compact = false, speci
             </select>
           </label>
           <div className="forecast-map-stat"><span>Model confidence</span><strong>{coverage}%</strong></div>
-          <div className="forecast-map-stat"><span>Selected area distance</span><strong>{distance} km by sea · {cellCount} areas</strong></div>
+          <div className="forecast-map-stat"><span>Selected area distance</span><strong>{selectedShape ? `${distance} km ${distanceLabel} · ${cellCount} areas` : `Select an area · ${cellCount} areas`}</strong></div>
         </div>
       )}
       {!compact && forecasts.length > 1 && (
@@ -286,6 +291,9 @@ export default function FishForecastMap({ forecasts = [], compact = false, speci
         <MapContainer center={[5, 73]} zoom={4.5} scrollWheelZoom={false}>
           <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapViewport bounds={shapeBounds} />
+          <CircleMarker center={start} radius={7} pathOptions={{ color: '#fff', weight: 2, fillColor: '#123d7b', fillOpacity: 1 }}>
+            <Tooltip direction="top">{harbour} harbour</Tooltip>
+          </CircleMarker>
           {shapes.map((shape, index) => {
             const key = `${shape.file}-${index}`;
             const tooltip = <Tooltip>{shape.region} fishing area</Tooltip>;
@@ -304,7 +312,12 @@ export default function FishForecastMap({ forecasts = [], compact = false, speci
               </GeoJSON>
             );
           })}
-          <Polyline positions={route} pathOptions={{ color: '#123d7b', dashArray: '8 8', weight: 3 }} />
+          {selectedShape && target && (
+            <CircleMarker center={target} radius={6} pathOptions={{ color: '#fff', weight: 2, fillColor: '#f0a500', fillOpacity: 1 }}>
+              <Tooltip direction="top">Selected forecast area</Tooltip>
+            </CircleMarker>
+          )}
+          {route.length > 1 && <Polyline positions={route} pathOptions={{ color: '#123d7b', dashArray: '8 8', weight: 3 }} />}
         </MapContainer>
       </div>
       {!compact && selectedShape && (
@@ -323,7 +336,7 @@ export default function FishForecastMap({ forecasts = [], compact = false, speci
           </div>
           <div>
             <span>Route from</span>
-            <strong>{harbour} harbour · {distance} km by sea</strong>
+            <strong>{harbour} harbour · {distance} km {distanceLabel}</strong>
           </div>
         </section>
       )}

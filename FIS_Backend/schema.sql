@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS yellowfin_forecast_shapes (
   status VARCHAR(20) NOT NULL DEFAULT 'uploaded' CHECK (status IN ('uploaded', 'published')),
   uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   published_at TIMESTAMPTZ,
-  expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '8 days')
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '8 days')
 );
 CREATE TABLE IF NOT EXISTS bigeye_forecast_shapes (LIKE yellowfin_forecast_shapes INCLUDING ALL);
 CREATE TABLE IF NOT EXISTS skipjack_forecast_shapes (LIKE yellowfin_forecast_shapes INCLUDING ALL);
