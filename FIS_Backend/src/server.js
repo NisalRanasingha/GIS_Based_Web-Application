@@ -199,6 +199,37 @@ app.get('/api/health', async (_req, res) => {
   res.json({ success: true, message: 'Backend is running' });
 });
 
+app.get('/api/harbour-boundaries', async (_req, res, next) => {
+  try {
+    const [locations, boundaries] = await Promise.all([
+      pool.query(
+        `SELECT id, name, description, latitude, longitude, status, created_at
+         FROM locations ORDER BY name ASC`
+      ),
+      pool.query(
+        `SELECT id, name, color, coordinates, zone_date, created_at
+         FROM boundaries ORDER BY name ASC`
+      )
+    ]);
+
+    const normalizedBoundaries = boundaries.rows.map((boundary) => {
+      let coordinates = boundary.coordinates;
+      if (typeof coordinates === 'string') {
+        coordinates = JSON.parse(coordinates);
+      }
+      return { ...boundary, coordinates };
+    });
+
+    res.json({
+      success: true,
+      locations: locations.rows,
+      boundaries: normalizedBoundaries
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get('/api/news', async (req, res, next) => {
   try {
     const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 6, 1), 24);

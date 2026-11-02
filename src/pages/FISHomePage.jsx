@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
+import { MapContainer, Polygon, TileLayer, useMap } from 'react-leaflet';
 import FISHeader from '../components/FISHeader';
 import FISFooter from '../components/FISFooter';
+import FishForecastMap from '../components/FishForecastMap';
 import { DEFAULT_NEWS_IMAGE, getNewsImageUrl } from '../utils/newsImage';
 import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf';
 import { services } from '../data/services';
+import 'leaflet/dist/leaflet.css';
 
 const vesselManagementUrl = 'https://fisheriesdept.gov.lk/regulations/';
 const marineLocations = [
@@ -73,6 +76,52 @@ const heroSlides = [
   },
 ];
 
+const HomeBoundaryViewport = ({ bounds }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds.length > 1) map.fitBounds(bounds, { padding: [18, 18] });
+  }, [bounds, map]);
+  return null;
+};
+
+function HarbourMapPreview() {
+  const [boundaries, setBoundaries] = useState([]);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/harbour-boundaries`)
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error('Boundary service unavailable.')))
+      .then((result) => setBoundaries(result.boundaries || []))
+      .catch(() => setBoundaries([]));
+  }, []);
+
+  const boundaryPaths = boundaries.flatMap((boundary) => {
+    let coordinates = boundary.coordinates;
+    if (typeof coordinates === 'string') {
+      try {
+        coordinates = JSON.parse(coordinates);
+      } catch {
+        return [];
+      }
+    }
+    return Array.isArray(coordinates) && coordinates.every((point) => Array.isArray(point) && point.length >= 2)
+      ? [{ coordinates: coordinates.map(([lat, lng]) => [Number(lat), Number(lng)]), color: boundary.color || '#3388ff' }]
+      : [];
+  });
+  const bounds = boundaryPaths.flatMap(({ coordinates }) => coordinates);
+
+  return (
+    <div className="relative z-0 isolate h-[210px] overflow-hidden border-b-4 border-[#0b568d] bg-[#dcecf2]">
+      <MapContainer center={[6.93, 79.84]} zoom={12} scrollWheelZoom={false} className="h-full w-full">
+        <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <HomeBoundaryViewport bounds={bounds} />
+        {boundaryPaths.map(({ coordinates, color }, index) => (
+          <Polygon key={`${color}-${index}`} positions={coordinates} pathOptions={{ color, fillColor: color, fillOpacity: 0.25, weight: 4 }} />
+        ))}
+      </MapContainer>
+    </div>
+  );
+}
+
 export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [newsItems, setNewsItems] = useState([]);
@@ -80,6 +129,7 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
   const [selectedMarineLocation, setSelectedMarineLocation] = useState(marineLocations[0].id);
   const [marineData, setMarineData] = useState(null);
   const [marineError, setMarineError] = useState('');
+  const [forecastMaps, setForecastMaps] = useState([]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -87,6 +137,13 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
     }, 4500);
 
     return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/fish-forecasts?species=yellowfin`)
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error('Forecast service unavailable.')))
+      .then((result) => setForecastMaps(result.forecasts || []))
+      .catch(() => setForecastMaps([]));
   }, []);
 
   useEffect(() => {
@@ -295,22 +352,22 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
                   Crow Island, Mattakkuliya, Colombo 15, Sri Lanka
                 </p>
               </div>
-              <div className="h-[280px] border-b-4 border-[#0b568d] bg-slate-200 lg:h-[210px] lg:min-h-0">
-                <iframe
-                  title="Map showing the NARA Fisheries Information Center"
-                  src="https://www.openstreetmap.org/export/embed.html?bbox=79.853%2C6.956%2C79.890%2C6.985&amp;layer=mapnik&amp;marker=6.970%2C79.872"
-                  className="h-full min-h-[280px] w-full border-0 lg:min-h-0"
-                  loading="lazy"
-                />
+              <div className="grid gap-3 bg-[#f5f8fa] p-3">
+                <div className="overflow-hidden border border-[#c4d3dd] bg-white">
+                  <div className="flex items-center justify-between px-3 py-2">
+                    <strong className="text-xs uppercase tracking-[0.08em] text-[#124a78]">Fish forecast</strong>
+                    <button type="button" onClick={() => onNavigate('fishForecast')} className="text-[11px] font-bold text-[#0b568d]">Open map →</button>
+                  </div>
+                  <FishForecastMap forecasts={forecastMaps} compact />
+                </div>
+                <div className="overflow-hidden border border-[#c4d3dd] bg-white">
+                  <div className="flex items-center justify-between px-3 py-2">
+                    <strong className="text-xs uppercase tracking-[0.08em] text-[#124a78]">Harbour boundaries</strong>
+                    <button type="button" onClick={() => onNavigate('harbourBoundary')} className="text-[11px] font-bold text-[#0b568d]">Open map →</button>
+                  </div>
+                  <HarbourMapPreview />
+                </div>
               </div>
-              <a
-                href="https://www.openstreetmap.org/?mlat=6.970&amp;mlon=79.872#map=15/6.970/79.872"
-                target="_blank"
-                rel="noreferrer"
-                className="bg-[#f5f8fa] px-4 py-3 text-center text-xs font-bold uppercase tracking-[0.08em] text-[#0b568d] transition hover:bg-[#e8f1f6]"
-              >
-                View larger map →
-              </a>
             </aside>
           </div>
         </section>

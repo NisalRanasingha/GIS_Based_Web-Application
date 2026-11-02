@@ -73,6 +73,27 @@ export async function initializeDatabase() {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS locations (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(160) NOT NULL,
+      description TEXT,
+      latitude NUMERIC(8, 5) NOT NULL CHECK (latitude BETWEEN -90 AND 90),
+      longitude NUMERIC(8, 5) NOT NULL CHECK (longitude BETWEEN -180 AND 180),
+      status VARCHAR(20) NOT NULL DEFAULT 'active',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS boundaries (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(160) NOT NULL,
+      color VARCHAR(20),
+      coordinates JSONB NOT NULL,
+      zone_date DATE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS fish_forecasts (
       id SERIAL PRIMARY KEY,
       species VARCHAR(40) NOT NULL,
