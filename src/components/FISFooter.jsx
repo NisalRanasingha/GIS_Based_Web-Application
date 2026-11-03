@@ -1,13 +1,16 @@
 import logo from '../assets/FISlogo.png';
 import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf';
 
+const libraryUrl = 'http://www.nara.ac.lk/?page_id=3373';
+const rightToInformationUrl = 'http://www.nara.ac.lk/?page_id=20339';
+const naraNewsUrl = 'http://www.nara.ac.lk/?page_id=20299';
 const quickLinks = [
-  { label: 'Fish Landing Statistics', href: '#' },
+  { label: 'Library and Information Center', href: libraryUrl, external: true },
   { label: 'Vessel Registration and Management', href: 'https://fisheriesdept.gov.lk/regulations/', external: true },
-  { label: 'Licensing & Permits', href: '#' },
-  { label: 'Research Grants', href: '#' },
+  { label: 'Right to Information', href: rightToInformationUrl, external: true },
+  { label: 'NARA News', href: naraNewsUrl, external: true },
   { label: 'Fisheries Act 2016', href: fishingActPdf, external: true },
-  { label: 'Marine Protected Areas', href: '#' },
+  { label: 'Marine Protected Areas', page: 'marineProtectedAreas' },
 ];
 
 export default function FISFooter({ onNavigate }) {
@@ -27,12 +30,8 @@ export default function FISFooter({ onNavigate }) {
           <p className="max-w-md text-[13px] leading-7 text-white/70">
             The Fisheries Information Center at NARA provides research, data, and advisory services to support Sri Lanka's fisheries and aquatic resources sector.
           </p>
-          <div className="mt-5 flex gap-2">
-            {['FB', 'TW', 'YT'].map((item) => (
-              <div key={item} className="flex h-8 w-8 items-center justify-center rounded-sm bg-white/10 text-[10px] font-bold text-white/80">
-                {item}
-              </div>
-            ))}
+          <div className="mx-auto mt-5 flex h-28 w-24 items-center justify-center rounded-sm bg-white p-2">
+            <img src="/services/Emblem_of_Sri_Lanka.svg" alt="Emblem of Sri Lanka" className="h-full w-full object-contain" />
           </div>
         </div>
 
@@ -41,7 +40,7 @@ export default function FISFooter({ onNavigate }) {
           <ul className="mt-4 space-y-3">
             {quickLinks.map((item) => (
               <li key={item.label}>
-                <a href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noreferrer' : undefined} className="flex items-center gap-2 text-[13px] text-white/70 transition hover:text-white">
+                <a href={item.href || '#'} onClick={item.page ? (event) => { event.preventDefault(); onNavigate(item.page); } : undefined} target={item.external ? '_blank' : undefined} rel={item.external ? 'noreferrer' : undefined} className="flex items-center gap-2 text-[13px] text-white/70 transition hover:text-white">
                   <span className="text-[#f4b740]">›</span>
                   <span>{item.label}</span>
                 </a>
@@ -66,12 +65,7 @@ export default function FISFooter({ onNavigate }) {
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-4 py-4 text-[12px] text-white/50 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <div>© 2026 National Aquatic Resources Research and Development Agency (NARA), Sri Lanka. All rights reserved.</div>
-          <div className="flex flex-wrap gap-4">
-            {['Privacy Policy', 'Disclaimer', 'Sitemap', 'RTI Act', 'Tenders', 'Vacancies'].map((item) => (
-              <a key={item} href="#" className="transition hover:text-white/80">{item}</a>
-            ))}
-          </div>
+          <div>© 2026 Fisheries Information Center (NARA), Sri Lanka. All rights reserved.</div>
         </div>
       </div>
     </footer>

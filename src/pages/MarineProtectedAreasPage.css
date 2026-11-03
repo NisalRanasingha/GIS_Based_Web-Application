@@ -1,0 +1,58 @@
+.marine-areas-page { min-height: 100vh; background: #edf3f7; color: #173d5e; }
+.marine-areas-hero { display: flex; justify-content: space-between; gap: 28px; padding: 54px max(24px, calc((100% - 1320px) / 2)); background: linear-gradient(115deg, #073b70, #0c7890); color: #fff; }
+.marine-areas-hero h1 { margin: 8px 0 12px; font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1.05; }
+.marine-areas-hero p:last-child { max-width: 650px; margin: 0; color: #d7eff2; font-size: 1.05rem; line-height: 1.7; }
+.marine-areas-hero-badge { display: flex; align-items: center; gap: 12px; align-self: center; border: 1px solid rgba(255,255,255,.35); padding: 16px 22px; background: rgba(3,29,60,.2); }
+.marine-areas-hero-badge span { color: #f4b740; font-size: 3rem; font-weight: 800; line-height: 1; }
+.marine-areas-hero-badge small { color: #e2f5f4; font-weight: 700; line-height: 1.25; text-transform: uppercase; }
+.marine-areas-content { width: min(1320px, calc(100% - 40px)); margin: 0 auto; padding: 58px 0 80px; }
+.marine-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 14px; }
+.marine-section-heading p { margin: 0 0 8px; color: #0c8b9b; font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.marine-section-heading h2 { margin: 0; color: #124a78; font-size: clamp(1.7rem, 3vw, 2.45rem); }
+.marine-section-heading > span { max-width: 300px; color: #718696; font-size: .88rem; text-align: right; }
+.marine-intro { max-width: 760px; margin: 0 0 30px; color: #5b7485; line-height: 1.7; }
+.marine-areas-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.marine-area-card { overflow: hidden; border: 1px solid #d5e2e8; background: #fff; box-shadow: 0 8px 22px rgba(18, 74, 120, .07); transition: transform .2s ease, box-shadow .2s ease; }
+.marine-area-card:hover { transform: translateY(-4px); box-shadow: 0 14px 28px rgba(18, 74, 120, .14); }
+.marine-area-card > img, .marine-area-placeholder { width: 100%; height: 190px; object-fit: cover; }
+.marine-area-placeholder { display: grid; place-items: center; background: linear-gradient(135deg, #0b568d, #0a9ca5); color: rgba(255,255,255,.8); font-size: 1.25rem; font-weight: 800; letter-spacing: .12em; line-height: 1.3; text-align: center; }
+.marine-area-card-body { position: relative; padding: 19px 19px 22px; }
+.marine-area-number { position: absolute; top: 16px; right: 18px; color: #cbd9e0; font-size: 1.35rem; font-weight: 800; }
+.marine-area-location { margin: 0 0 8px; color: #0c8b9b; font-size: .76rem; font-weight: 700; }
+.marine-area-card h3 { max-width: 85%; min-height: 46px; margin: 0 0 10px; color: #124a78; font-size: 1.12rem; line-height: 1.3; }
+.marine-area-card-body > p:not(.marine-area-location) { min-height: 76px; margin: 0 0 18px; color: #687e8c; font-size: .87rem; line-height: 1.55; }
+.marine-area-card a, .marine-note a, .marine-resource-links a { color: #0b6f91; font-size: .82rem; font-weight: 800; text-decoration: none; }
+.marine-area-card a:hover, .marine-note a:hover, .marine-resource-links a:hover { color: #f09f1b; }
+.marine-area-card a span, .marine-note a span, .marine-resource-links a span { margin-left: 5px; color: #f0a62c; }
+.marine-note { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin: 48px 0 68px; padding: 25px 28px; border-left: 5px solid #f0b429; background: #fff; box-shadow: 0 5px 16px rgba(18, 74, 120, .07); }
+.marine-note > div { display: flex; align-items: center; gap: 17px; }
+.marine-note-icon, .marine-gis-icon { color: #0b8796; font-size: 2rem; }
+.marine-note h2 { margin: 0 0 6px; color: #124a78; font-size: 1.15rem; }
+.marine-note p { margin: 0; color: #6a7f8e; font-size: .9rem; }
+.marine-gis-section { padding-top: 8px; }
+.marine-gis-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; padding: 28px; border: 1px solid #cfdee6; background: #e3f0f4; }
+.marine-gis-grid h3 { margin: 0 0 9px; color: #124a78; font-size: 1.2rem; }
+.marine-gis-grid p { margin: 0; color: #5e7786; line-height: 1.65; }
+.marine-gis-icon { float: left; margin: -4px 13px 10px 0; }
+.marine-resource-links { display: flex; flex-direction: column; justify-content: center; gap: 16px; padding-left: 28px; border-left: 1px solid #bfd4dc; }
+.marine-disclaimer { margin: 22px 0 0; color: #748895; font-size: .82rem; line-height: 1.6; }
+.marine-disclaimer strong { color: #496979; }
+@media (max-width: 1050px) { .marine-areas-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .marine-areas-hero { padding: 38px 20px; }
+  .marine-areas-hero-badge { display: none; }
+  .marine-areas-content { width: min(100% - 28px, 560px); padding-top: 38px; }
+  .marine-section-heading { display: block; }
+  .marine-section-heading > span { display: block; margin-top: 12px; text-align: left; }
+  .marine-areas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .marine-area-card > img, .marine-area-placeholder { height: 150px; }
+  .marine-area-card-body { padding: 15px; }
+  .marine-area-card h3 { font-size: 1rem; }
+  .marine-area-card-body > p:not(.marine-area-location) { min-height: 0; }
+  .marine-note { display: block; margin: 34px 0 48px; padding: 20px; }
+  .marine-note > div { align-items: start; }
+  .marine-note > a { display: inline-block; margin: 17px 0 0 49px; }
+  .marine-gis-grid { grid-template-columns: 1fr; gap: 22px; padding: 20px; }
+  .marine-resource-links { padding: 20px 0 0; border-top: 1px solid #bfd4dc; border-left: 0; }
+}
+@media (max-width: 460px) { .marine-areas-grid { grid-template-columns: 1fr; } .marine-area-card > img, .marine-area-placeholder { height: 190px; } }

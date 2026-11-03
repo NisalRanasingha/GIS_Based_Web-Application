@@ -5,10 +5,20 @@ import FISFooter from '../components/FISFooter';
 import FishForecastMap from '../components/FishForecastMap';
 import { DEFAULT_NEWS_IMAGE, getNewsImageUrl } from '../utils/newsImage';
 import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf';
-import { services } from '../data/services';
 import 'leaflet/dist/leaflet.css';
 
 const vesselManagementUrl = 'https://fisheriesdept.gov.lk/regulations/';
+const libraryUrl = 'http://www.nara.ac.lk/?page_id=3373';
+const rightToInformationUrl = 'http://www.nara.ac.lk/?page_id=20339';
+const naraNewsUrl = 'http://www.nara.ac.lk/?page_id=20299';
+const services = [
+  { image: '/services/TF_8K.png', title: 'Fish Forecasting', text: 'Explore daily marine conditions and habitat suitability maps to support safer fishing decisions.', page: 'fishForecast' },
+  { image: '/services/Oceanographic.jpg', title: 'Harbour Boundary Mapping', text: 'View mapped harbour boundaries and coastal locations through the interactive GIS map.', page: 'harbourBoundary' },
+  { image: '/services/Adam\'s Bridge Marine National Park.jpg', title: 'Marine Protected Areas', text: 'Discover Sri Lanka’s marine parks, sanctuaries, conservation areas, and mapped locations.', page: 'marineProtectedAreas' },
+  { image: '', title: 'Weekly Forecast Summary', text: 'Review the weekly marine forecast summary for planning fishing activity across Sri Lanka.', page: 'weeklySummary' },
+  { image: '/services/news.png', title: 'News & Events', text: 'Stay informed about fisheries advisories, announcements, workshops, and events.', page: 'news' },
+  { image: '/nara_cover.jpg', title: 'Contact & Information Support', text: 'Connect with the Fisheries Information Center for research support and information requests.', page: 'contact' },
+];
 const marineLocations = [
   { id: 'colombo', name: 'Colombo', latitude: 6.5, longitude: 79.6 },
   { id: 'negombo', name: 'Negombo', latitude: 7.2, longitude: 79.6 },
@@ -314,15 +324,17 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
 
               <div className="mb-5 flex flex-wrap border border-[#b9cbd8] bg-white">
                 <span className="bg-[#0b568d] px-3 py-2 text-[11px] font-bold text-white sm:px-4">
-                  Ecosystem Services
+                  Website Services
                 </span>
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
                 {services.map((service) => (
-                  <article
+                  <button
+                    type="button"
                     key={service.title}
-                    className="group flex h-full flex-col overflow-hidden border border-[#c4d3dd] bg-white shadow-[0_2px_6px_rgba(21,67,98,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-[#0b568d] hover:shadow-md"
+                    onClick={() => onNavigate(service.page)}
+                    className="group flex h-full flex-col overflow-hidden border border-[#c4d3dd] bg-white text-left shadow-[0_2px_6px_rgba(21,67,98,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-[#0b568d] hover:shadow-md"
                   >
                     <div className="h-32 w-full overflow-hidden border-b-2 border-[#f0b429] bg-slate-200 sm:h-36">
                       <img
@@ -332,11 +344,11 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
                       />
                     </div>
 
-                    <div className="flex flex-1 flex-col p-4">
+                    <div className="flex flex-1 flex-col p-4 text-center">
                       <h3 className="mb-2 text-base font-bold text-[#124a78]">{service.title}</h3>
                       <p className="text-[13px] leading-5 text-slate-600">{service.text}</p>
                     </div>
-                  </article>
+                  </button>
                 ))}
               </div>
             </div>
@@ -434,14 +446,14 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
                 <h3 className="mb-4 border-b border-[#d4e0e7] pb-3 text-xl font-bold text-[#124a78]">Quick Links</h3>
                 <div className="space-y-3">
                   {[
-                    { label: 'Fish Landing Statistics', href: '#' },
+                    { label: 'Library and Information Center', href: libraryUrl, external: true },
                     { label: 'Vessel Registration and Management', href: vesselManagementUrl, external: true },
-                    { label: 'Licensing & Permits', href: '#' },
-                    { label: 'Research Grants', href: '#' },
+                    { label: 'Right to Information', href: rightToInformationUrl, external: true },
+                    { label: 'NARA News', href: naraNewsUrl, external: true },
                     { label: 'Fisheries Act 2016', href: fishingActPdf, external: true },
-                    { label: 'Marine Protected Areas', href: '#' },
+                    { label: 'Marine Protected Areas', onClick: () => onNavigate('marineProtectedAreas') },
                   ].map((link) => (
-                    <a key={link.label} href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noreferrer' : undefined} className="flex items-center justify-between gap-3 border-b border-[#d4e0e7] px-2 py-2 text-[13px] font-semibold text-[#245678] transition hover:bg-[#edf5ff] hover:text-[#0b568d]">
+                    <a key={link.label} href={link.href || '#'} onClick={link.onClick ? (event) => { event.preventDefault(); link.onClick(); } : undefined} target={link.external ? '_blank' : undefined} rel={link.external ? 'noreferrer' : undefined} className="flex items-center justify-between gap-3 border-b border-[#d4e0e7] px-2 py-2 text-[13px] font-semibold text-[#245678] transition hover:bg-[#edf5ff] hover:text-[#0b568d]">
                       <span>{link.label}</span>
                       <span className="text-[#0d3b7c]">›</span>
                     </a>

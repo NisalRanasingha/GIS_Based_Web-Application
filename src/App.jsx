@@ -12,6 +12,7 @@ import NewsPage from './pages/NewsPage';
 import FishForecastPage from './pages/FishForecastPage';
 import AdminFishForecastPage from './pages/AdminFishForecastPage';
 import HarbourBoundaryPage from './pages/HarbourBoundaryPage';
+import MarineProtectedAreasPage from './pages/MarineProtectedAreasPage';
 
 const sectionPages = {
   services: {
@@ -34,6 +35,7 @@ const pagePaths = {
   services: '/services',
   fishForecast: '/services/fish-forecast',
   harbourBoundary: '/services/harbour-boundary',
+  marineProtectedAreas: '/marine-protected-areas',
   weeklySummary: '/services/fish-forecast/weekly-summary',
   news: '/news',
   adminInquiries: '/admin/inquiries',
@@ -135,6 +137,7 @@ function App() {
   if (page === 'news') return <NewsPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
   if (page === 'fishForecast') return <FishForecastPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
   if (page === 'harbourBoundary') return <HarbourBoundaryPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
+  if (page === 'marineProtectedAreas') return <MarineProtectedAreasPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
   if (page === 'weeklySummary') return <FishForecastPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} weeklySummary />;
   if (sectionPages[page]) {
     return <FISSectionPage page={page} {...sectionPages[page]} onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;

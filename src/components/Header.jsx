@@ -27,8 +27,8 @@ export default function Header({ onNavigate }) {
           <div className="brand-box">
             <div className="brand-icon">🐟</div>
             <div className="brand-copy-block">
-              <div className="brand-kicker">FISHERIES INFORMATION CENTER</div>
-              <h1>National Aquatic Resources Research and Development Agency</h1>
+              <div className="brand-kicker">National Aquatic Resources Research and Development Agency</div>
+              <h1>FISHERIES INFORMATION CENTER - FIS</h1>
               <small>Ministry of Fisheries, Sri Lanka</small>
             </div>
           </div>

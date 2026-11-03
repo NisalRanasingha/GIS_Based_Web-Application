@@ -1,6 +1,9 @@
 import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf'
 
 const vesselManagementUrl = 'https://fisheriesdept.gov.lk/regulations/'
+const libraryUrl = 'http://www.nara.ac.lk/?page_id=3373'
+const rightToInformationUrl = 'http://www.nara.ac.lk/?page_id=20339'
+const naraNewsUrl = 'http://www.nara.ac.lk/?page_id=20299'
 
 const services = [
   {
@@ -51,12 +54,12 @@ const newsItems = [
 ]
 
 const quickLinks = [
-  { label: 'Fish Landing Statistics', href: '#' },
+  { label: 'Library and Information Center', href: libraryUrl, external: true },
   { label: 'Vessel Registration and Management', href: vesselManagementUrl, external: true },
-  { label: 'Licensing & Permits', href: '#' },
-  { label: 'Research Grants', href: '#' },
+  { label: 'Right to Information', href: rightToInformationUrl, external: true },
+  { label: 'NARA News', href: naraNewsUrl, external: true },
   { label: 'Fisheries Act 2016', href: fishingActPdf, external: true },
-  { label: 'Marine Protected Areas', href: '#' },
+  { label: 'Marine Protected Areas', href: '/marine-protected-areas' },
 ]
 
 export default function HomePage({ onNavigate }) {
@@ -153,7 +156,7 @@ export default function HomePage({ onNavigate }) {
               <h3>Quick Links</h3>
               <div className="quick-links-list">
                 {quickLinks.map((link) => (
-                  <a key={link.label} href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noreferrer' : undefined} className="quick-link-item">
+                  <a key={link.label} href={link.href} onClick={link.onClick ? (event) => { event.preventDefault(); link.onClick(); } : undefined} target={link.external ? '_blank' : undefined} rel={link.external ? 'noreferrer' : undefined} className="quick-link-item">
                     <span className="link-icon">↗</span>
                     <span>{link.label}</span>
                     <span className="chevron">›</span>

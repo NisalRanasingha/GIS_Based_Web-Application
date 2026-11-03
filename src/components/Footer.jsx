@@ -1,10 +1,11 @@
 import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf'
 
 const vesselManagementUrl = 'https://fisheriesdept.gov.lk/regulations/'
+const libraryUrl = 'http://www.nara.ac.lk/?page_id=3373'
+const rightToInformationUrl = 'http://www.nara.ac.lk/?page_id=20339'
+const naraNewsUrl = 'http://www.nara.ac.lk/?page_id=20299'
 
 export default function Footer({ onNavigate }) {
-  const footerLinks = ['Privacy Policy', 'Disclaimer', 'Sitemap', 'RTI Act', 'Tenders', 'Vacancies']
-
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
@@ -14,6 +15,7 @@ export default function Footer({ onNavigate }) {
             <div>
               <h4>Fisheries Information Center</h4>
               <small>NARA, Sri Lanka</small>
+             
             </div>
           </div>
 
@@ -22,26 +24,25 @@ export default function Footer({ onNavigate }) {
             support Sri Lanka&apos;s fisheries and aquatic resources sector.
           </p>
 
-          <div className="mini-badges">
-            <span>FB</span>
-            <span>TW</span>
-            <span>YT</span>
+          <div className="footer-emblem">
+            <img src="/services/Emblem_of_Sri_Lanka.svg" alt="Emblem of Sri Lanka" />
           </div>
         </div>
+        
 
         <div className="footer-column">
           <h4>Quick Links</h4>
           <ul>
             {[
-              { label: 'Fish Landing Statistics' },
+              { label: 'Library and Information Center', href: libraryUrl, external: true },
               { label: 'Vessel Registration and Management', href: vesselManagementUrl, external: true },
-              { label: 'Licensing & Permits' },
-              { label: 'Research Grants' },
+              { label: 'Right to Information', href: rightToInformationUrl, external: true },
+              { label: 'NARA News', href: naraNewsUrl, external: true },
               { label: 'Fisheries Act 2016', href: fishingActPdf, external: true },
-              { label: 'Marine Protected Areas' },
+              { label: 'Marine Protected Areas', href: '#', onClick: () => onNavigate('marineProtectedAreas') },
             ].map((link) => (
               <li key={link.label}>
-                {link.href ? <a href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noreferrer' : undefined}>{link.label}</a> : link.label}
+                {link.href ? <a href={link.href} onClick={link.onClick ? (event) => { event.preventDefault(); link.onClick(); } : undefined} target={link.external ? '_blank' : undefined} rel={link.external ? 'noreferrer' : undefined}>{link.label}</a> : link.label}
               </li>
             ))}
           </ul>
@@ -63,12 +64,7 @@ export default function Footer({ onNavigate }) {
 
       <div className="footer-bottom">
         <div className="container footer-bottom-inner">
-          <span>© 2026 National Aquatic Resources Research and Development Agency (NARA), Sri Lanka. All rights reserved.</span>
-          <div className="footer-links">
-            {footerLinks.map((link) => (
-              <span key={link}>{link}</span>
-            ))}
-          </div>
+          <span>© 2026 Fisheries Information Center (NARA), Sri Lanka. All rights reserved.</span>
         </div>
       </div>
     </footer>
