@@ -24,6 +24,12 @@ const speciesImages = {
   skipjack: skipjackImage,
 };
 
+const summarySpecies = [
+  { key: 'yellowfin', label: 'Yellowfin tuna', color: '#e5a900', fillColor: '#f4c542' },
+  { key: 'bigeye', label: 'Bigeye tuna', color: '#b51f1f', fillColor: '#e34b4b' },
+  { key: 'skipjack', label: 'Skipjack tuna', color: '#21834a', fillColor: '#48b878' },
+];
+
 const emptyFiles = [];
 
 const parseShapefile = (buffer) => {
@@ -100,6 +106,29 @@ const loadShapeFiles = async (species) => {
   return loadedShapes;
 };
 
+const loadSummaryShapeFiles = async () => {
+  const uploaded = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/fish-forecast-weekly-summary`);
+  if (!uploaded.ok) {
+    throw new Error('No published weekly summary map is available.');
+  }
+  const result = await uploaded.json();
+  const loadedShapes = (result.shapes || []).flatMap((shape) => {
+    if (/_cpoint\.shp$/i.test(shape.original_name)) return [];
+    const parsed = parseShapefile(Uint8Array.from(atob(shape.content), (character) => character.charCodeAt(0)).buffer);
+    return parsed.features.filter((feature) => feature.type === 'polygon').map((feature, index) => ({
+      ...feature,
+      species: shape.species,
+      file: `${shape.id}-${index}`,
+      region: shape.original_name.replace(/\.shp$/i, ''),
+      forecastDate: shape.forecast_date,
+    }));
+  });
+  if (!loadedShapes.length) {
+    throw new Error('No polygon fishing-area shapefile is available for the weekly summary.');
+  }
+  return loadedShapes;
+};
+
 const loadLocalShapeFiles = async (files) => (
   (await Promise.all(files.map(async (file) => {
     if (/_cpoint\.shp$/i.test(file.name)) return [];
@@ -119,6 +148,19 @@ const MapViewport = ({ bounds }) => {
     if (bounds.length) map.fitBounds(bounds, { padding: [24, 24] });
   }, [bounds, map]);
   return null;
+};
+
+const MapCenterButton = ({ bounds }) => {
+  const map = useMap();
+  const centerMap = () => {
+    if (bounds.length) map.fitBounds(bounds, { padding: [24, 24] });
+  };
+
+  return (
+    <button type="button" className="forecast-map-center-button" onClick={centerMap} disabled={!bounds.length}>
+      Center map
+    </button>
+  );
 };
 
 const sriLankaMask = [
@@ -219,6 +261,8 @@ export default function FishForecastMap({
   species = 'yellowfin',
   localFiles = emptyFiles,
   onSpeciesChange,
+  onNavigate,
+  weeklySummary = false,
 }) {
   const [harbour, setHarbour] = useState('Colombo');
   const [selectedId, setSelectedId] = useState(0);
@@ -251,7 +295,9 @@ export default function FishForecastMap({
 
   useEffect(() => {
     let active = true;
-    const load = localFiles.length ? loadLocalShapeFiles(localFiles) : loadShapeFiles(species);
+    const load = weeklySummary
+      ? loadSummaryShapeFiles()
+      : (localFiles.length ? loadLocalShapeFiles(localFiles) : loadShapeFiles(species));
     load
       .then((loadedShapes) => {
         if (active) {
@@ -264,21 +310,46 @@ export default function FishForecastMap({
         if (active) setShapeError(error.message);
       });
     return () => { active = false; };
-  }, [localFiles, species]);
+  }, [localFiles, species, weeklySummary]);
+
+  const getSummarySpecies = (shape) => summarySpecies.find((item) => item.key === shape.species);
 
   return (
-    <div className={`forecast-map-shell ${compact ? 'forecast-map-shell-compact' : ''}`}>
-      {!compact && (
-        <div className="forecast-map-toolbar">
-          <div className="forecast-species-card">
-            <img src={speciesImages[species]} alt={`${species} tuna`} />
-            <label>
-              <span>Fish species</span>
+      <div className={`forecast-map-shell ${compact ? 'forecast-map-shell-compact' : ''}`}>
+        {weeklySummary && (
+          <div className="forecast-summary-intro">
+            <div>
+              <p className="forecast-summary-kicker">Weekly species overview</p>
+              <h3>Published fishing areas around Sri Lanka</h3>
+              <p>Hover over a coloured area to see its species, source region, and publication date. Click an area for route details.</p>
+            </div>
+            <div className="forecast-summary-legend" aria-label="Map legend">
+              {summarySpecies.map((item) => (
+                <div className="forecast-summary-legend-item" key={item.key}>
+                  <span style={{ backgroundColor: item.fillColor }} />
+                  <img src={speciesImages[item.key]} alt="" />
+                  <strong>{item.label}</strong>
+                </div>
+              ))}
+            </div>
+            <div className="forecast-summary-actions">
+              <button type="button" className="forecast-summary-action" onClick={() => onNavigate?.('fishForecast')}>
+                Daily map view
+              </button>
+            </div>
+          </div>
+        )}
+        {!compact && !weeklySummary && (
+          <div className="forecast-map-toolbar">
+            {!weeklySummary && <div className="forecast-species-card">
+              <img src={speciesImages[species]} alt={`${species} tuna`} />
+              <label>
+                <span>Fish species</span>
               <select value={species} onChange={(event) => onSpeciesChange?.(event.target.value)}>
                 {Object.entries(fishSpecies).map(([key, item]) => <option value={key} key={key}>{item.label}</option>)}
               </select>
             </label>
-          </div>
+          </div>}
           <label>
             Harbour
             <select value={harbour} onChange={(event) => setHarbour(event.target.value)}>
@@ -289,7 +360,7 @@ export default function FishForecastMap({
           <div className="forecast-map-stat"><span>Selected area distance</span><strong>{selectedShape ? `${distance} km ${distanceLabel} · ${cellCount} areas` : `Select an area · ${cellCount} areas`}</strong></div>
         </div>
       )}
-      {!compact && forecasts.length > 1 && (
+      {!compact && !weeklySummary && forecasts.length > 1 && (
         <div className="forecast-timeline" aria-label="Past seven forecast days">
           {forecasts.map((item, index) => (
             <button type="button" className={index === selectedId ? 'active' : ''} key={`${item.forecast_date}-${index}`} onClick={() => setSelectedId(index)}>
@@ -303,12 +374,21 @@ export default function FishForecastMap({
         <MapContainer center={[5, 73]} zoom={4.5} scrollWheelZoom={false}>
           <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapViewport bounds={shapeBounds} />
+          {weeklySummary && <MapCenterButton bounds={shapeBounds} />}
           <CircleMarker center={start} radius={7} pathOptions={{ color: '#fff', weight: 2, fillColor: '#123d7b', fillOpacity: 1 }}>
             <Tooltip direction="top">{harbour} harbour</Tooltip>
           </CircleMarker>
           {shapes.map((shape, index) => {
             const key = `${shape.file}-${index}`;
-            const tooltip = <Tooltip>{shape.region} fishing area</Tooltip>;
+            const summaryItem = getSummarySpecies(shape);
+            const tooltip = (
+              <Tooltip direction="top" sticky>
+                {summaryItem && <img className="forecast-tooltip-fish" src={speciesImages[shape.species]} alt="" />}
+                <strong>{summaryItem?.label || `${species} tuna`}</strong>
+                <span>{shape.region} fishing area</span>
+                <small>{shape.forecastDate ? `Published ${new Date(shape.forecastDate).toLocaleDateString('en', { day: '2-digit', month: 'short', year: 'numeric' })}` : 'Published forecast area'}</small>
+              </Tooltip>
+            );
             return (
               <GeoJSON
                 key={key}
@@ -317,7 +397,12 @@ export default function FishForecastMap({
                   properties: { region: shape.region },
                   geometry: { type: 'Polygon', coordinates: shape.geoJsonCoordinates },
                 }}
-                style={{ color: '#b51f1f', fillColor: '#d62828', fillOpacity: index === selectedArea ? 0.65 : 0.4, weight: index === selectedArea ? 3 : 2 }}
+                style={{
+                  color: summaryItem?.color || '#b51f1f',
+                  fillColor: summaryItem?.fillColor || '#d62828',
+                  fillOpacity: index === selectedArea ? 0.72 : 0.46,
+                  weight: index === selectedArea ? 3 : 2,
+                }}
                 eventHandlers={{ click: () => setSelectedArea(index) }}
               >
                 {tooltip}
@@ -329,10 +414,10 @@ export default function FishForecastMap({
               <Tooltip direction="top">Selected forecast area</Tooltip>
             </CircleMarker>
           )}
-          {route.length > 1 && <Polyline positions={route} pathOptions={{ color: '#123d7b', dashArray: '8 8', weight: 3 }} />}
+          {route.length > 1 && !weeklySummary && <Polyline positions={route} pathOptions={{ color: '#123d7b', dashArray: '8 8', weight: 3 }} />}
         </MapContainer>
       </div>
-      {!compact && selectedShape && (
+      {!compact && !weeklySummary && selectedShape && (
         <section className="forecast-area-details" aria-live="polite">
           <div>
             <span>Selected forecast area</span>
@@ -352,7 +437,7 @@ export default function FishForecastMap({
           </div>
         </section>
       )}
-      {!compact && <p className="forecast-map-note">{shapeError ? `Forecast shape layers could not be loaded: ${shapeError}` : 'Red polygons show forecast fishing areas. Select a harbour from the list or its blue map marker, then select an area to see the shortest sea route. Always confirm sea conditions before departure.'}</p>}
+      {!compact && !weeklySummary && <p className="forecast-map-note">{shapeError ? `Forecast shape layers could not be loaded: ${shapeError}` : 'Red polygons show forecast fishing areas. Select a harbour from the list or its blue map marker, then select an area to see the shortest sea route. Always confirm sea conditions before departure.'}</p>}
     </div>
   );
 }

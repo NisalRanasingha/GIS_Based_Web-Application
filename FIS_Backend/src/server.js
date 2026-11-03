@@ -338,6 +338,48 @@ app.get('/api/fish-forecasts', async (req, res, next) => {
   }
 });
 
+app.get('/api/fish-forecast-weekly-summary', async (_req, res, next) => {
+  try {
+    const speciesShapes = await Promise.all(Object.entries(shapeTables).map(async ([species, table]) => {
+      const result = await pool.query(
+        `SELECT s.id, s.forecast_date, s.original_name, s.mime_type, s.content
+         FROM ${table} s
+         WHERE s.status = 'published'
+           AND s.expires_at > NOW()
+           AND s.forecast_date IN (
+             SELECT forecast_date
+             FROM ${table}
+             WHERE status = 'published'
+             GROUP BY forecast_date
+             ORDER BY forecast_date DESC
+             LIMIT 7
+           )
+         ORDER BY s.uploaded_at ASC`,
+        []
+      );
+
+      return {
+        species,
+        shapes: result.rows.map((shape) => ({
+          id: shape.id,
+          forecast_date: shape.forecast_date,
+          original_name: shape.original_name,
+          mime_type: shape.mime_type,
+          content: shape.content.toString('base64')
+        }))
+      };
+    }));
+
+    res.json({
+      success: true,
+      species: speciesShapes,
+      shapes: speciesShapes.flatMap(({ species, shapes }) => shapes.map((shape) => ({ ...shape, species })))
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get('/api/fish-forecast-shapes/:species', async (req, res, next) => {
   try {
     const species = z.enum(['yellowfin', 'bigeye', 'skipjack']).parse(req.params.species);
