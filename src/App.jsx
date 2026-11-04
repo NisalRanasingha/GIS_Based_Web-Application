@@ -13,6 +13,8 @@ import FishForecastPage from './pages/FishForecastPage';
 import AdminFishForecastPage from './pages/AdminFishForecastPage';
 import HarbourBoundaryPage from './pages/HarbourBoundaryPage';
 import MarineProtectedAreasPage from './pages/MarineProtectedAreasPage';
+import UserDashboardPage from './pages/UserDashboardPage';
+import AdminProfilePage from './pages/AdminProfilePage';
 
 const sectionPages = {
   services: {
@@ -41,8 +43,10 @@ const pagePaths = {
   adminInquiries: '/admin/inquiries',
   adminNews: '/admin/news',
   adminFishForecast: '/admin/fish-forecast',
+  adminProfile: '/admin/profile',
+  dashboard: '/dashboard',
 };
-const adminPages = new Set(['admin', 'adminInquiries', 'adminNews', 'adminFishForecast']);
+const adminPages = new Set(['admin', 'adminInquiries', 'adminNews', 'adminFishForecast', 'adminProfile']);
 
 const pageFromPath = (pathname) => {
   const normalizedPath = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
@@ -52,6 +56,7 @@ const pageFromPath = (pathname) => {
 
 function App() {
   const [page, setPage] = useState(() => pageFromPath(window.location.pathname));
+  const [loginEmail, setLoginEmail] = useState('');
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const savedUser = window.sessionStorage.getItem('fis_user');
@@ -83,7 +88,7 @@ function App() {
       handleNavigate('admin');
       return;
     }
-    handleNavigate('home');
+    handleNavigate('dashboard');
   };
 
   const handleLogout = () => {
@@ -119,18 +124,25 @@ function App() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [page]);
 
-  if (page === 'login') return <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />;
-  if (page === 'signup') return <Signup onNavigate={handleNavigate} />;
+  if (page === 'login') return <><FISHomePage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} /><Login initialEmail={loginEmail} onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} onClose={() => handleNavigate('home')} /></>;
+  if (page === 'signup') return <><FISHomePage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} /><Signup onNavigate={handleNavigate} onSignupSuccess={(email) => { setLoginEmail(email); handleNavigate('login'); }} onClose={() => handleNavigate('home')} /></>;
+  if (page === 'dashboard') {
+    if (!currentUser || currentUser.role !== 'user') {
+      return <FISHomePage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
+    }
+    return <UserDashboardPage currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} onUserUpdate={setCurrentUser} />;
+  }
   if (adminPages.has(page)) {
     if (!currentUser || currentUser.role !== 'admin') {
       return <FISHomePage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
     }
     if (page === 'admin') {
-      return <AdminDashboardPage currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} />;
+      return <AdminDashboardPage currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} onUserUpdate={setCurrentUser} />;
     }
+    if (page === 'adminProfile') return <AdminProfilePage currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} onUserUpdate={setCurrentUser} />;
     if (page === 'adminFishForecast') return <AdminFishForecastPage currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} />;
-    if (page === 'adminInquiries') return <AdminInquiriesPage onNavigate={handleNavigate} />;
-    return <AdminNewsPage onNavigate={handleNavigate} />;
+    if (page === 'adminInquiries') return <AdminInquiriesPage currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} />;
+    return <AdminNewsPage currentUser={currentUser} onNavigate={handleNavigate} onLogout={handleLogout} />;
   }
   if (page === 'about') return <About onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;
   if (page === 'contact') return <FISContactPage onNavigate={handleNavigate} currentUser={currentUser} onLogout={handleLogout} />;

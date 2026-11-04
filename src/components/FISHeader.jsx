@@ -125,7 +125,7 @@ export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
 
           {!hideLoginButton && (currentUser ? (
             <div className="hidden shrink-0 items-center gap-3 md:flex">
-              <span className="text-[13px] font-semibold text-white">Hi, {userName}</span>
+              <button type="button" className="text-[13px] font-semibold text-white hover:text-[#f4b740]" onClick={() => currentUser.role === 'user' ? onNavigate('dashboard') : onNavigate('admin')}>Hi, {userName}</button>
               <button
                 type="button"
                 onClick={onLogout}
@@ -191,7 +191,7 @@ export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
 
                 {!hideLoginButton && (currentUser ? (
                   <div className="mt-2 flex items-center justify-between gap-3 rounded-md border border-white/20 bg-white/10 px-3 py-3 text-sm font-semibold text-white">
-                    <span>Hi, {userName}</span>
+                    <button type="button" className="font-semibold text-white hover:text-[#f4b740]" onClick={() => { onNavigate(currentUser.role === 'user' ? 'dashboard' : 'admin'); setMenuOpen(false); }}>Hi, {userName}</button>
                     <button
                       type="button"
                       onClick={() => {

@@ -30,10 +30,79 @@ img { max-width: 100%; display: block; }
 .app-shell { min-height: 100vh; }
 
 .fics-page-banner {
+  position: relative;
   padding: 28px 0 32px;
   color: #fff;
   border-top: 4px solid #f0b429;
   background: #124a78;
+}
+
+.scroll-down-prompt {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 4px 10px;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,.9);
+  background: transparent;
+  font-size: .78rem;
+  font-weight: 400;
+  white-space: nowrap;
+  transition: opacity .3s ease, visibility .3s ease;
+}
+
+.scroll-down-prompt-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scroll-down-prompt-icon {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 27px;
+  border: 1.5px solid currentColor;
+  border-radius: 10px;
+  animation: scroll-down-bounce 1.6s ease-in-out infinite;
+}
+
+.scroll-down-prompt-icon span {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  width: 2px;
+  height: 6px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: translateX(-50%);
+}
+
+.scroll-down-prompt:hover,
+.scroll-down-prompt:focus-visible {
+  color: #fff;
+}
+
+.scroll-down-prompt:focus-visible {
+  outline: 2px solid #f0b429;
+  outline-offset: 3px;
+}
+
+@keyframes scroll-down-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+.fish-forecast-hero,
+.harbour-hero,
+.marine-areas-hero {
+  position: relative;
 }
 
 .fics-page-banner-inner {
@@ -73,6 +142,11 @@ img { max-width: 100%; display: block; }
   .fics-page-banner { padding: 24px 0 28px; }
   .fics-page-banner-inner { width: min(100% - 36px, 560px); }
   .fics-page-banner-copy { font-size: .86rem; }
+  .scroll-down-prompt { bottom: 16px; font-size: .7rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-down-prompt-icon { animation: none; }
 }
 
 .notice-bar {

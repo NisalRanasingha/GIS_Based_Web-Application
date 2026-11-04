@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import './AdminInquiries.css';
 import LoadingOverlay from '../components/LoadingOverlay';
 import CenterAlert from '../components/CenterAlert';
+import { apiFetch } from '../utils/api';
+import AdminSidebar from '../components/AdminSidebar';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const statusLabels = { new: 'New', in_progress: 'In progress', resolved: 'Resolved', archived: 'Archived' };
 const priorityLabels = { low: 'Low', normal: 'Normal', high: 'High', urgent: 'Urgent' };
 
@@ -12,7 +13,7 @@ const formatDate = (value) => new Intl.DateTimeFormat('en', {
   timeStyle: 'short',
 }).format(new Date(value));
 
-export default function AdminInquiriesPage({ onNavigate }) {
+export default function AdminInquiriesPage({ currentUser, onNavigate, onLogout }) {
   const [inquiries, setInquiries] = useState([]);
   const [stats, setStats] = useState({ total: 0, new: 0, in_progress: 0, resolved: 0, attention: 0 });
   const [selected, setSelected] = useState(null);
@@ -25,9 +26,7 @@ export default function AdminInquiriesPage({ onNavigate }) {
     setFeedback(null);
     const query = new URLSearchParams(filters);
     try {
-      const response = await fetch(`${apiUrl}/api/admin/inquiries?${query}`);
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || 'Unable to load inquiries.');
+      const result = await apiFetch(`/api/admin/inquiries?${query}`);
       setInquiries(result.inquiries || []);
       setStats(result.stats || {});
     } catch (error) {
@@ -43,13 +42,10 @@ export default function AdminInquiriesPage({ onNavigate }) {
   }, [loadInquiries]);
 
   const updateInquiry = async (id, changes) => {
-    const response = await fetch(`${apiUrl}/api/admin/inquiries/${id}`, {
+    const result = await apiFetch(`/api/admin/inquiries/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(changes),
     });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || 'Unable to update inquiry.');
     setSelected((current) => (current?.id === id ? { ...current, ...result.inquiry } : current));
     await loadInquiries();
   };
@@ -57,11 +53,9 @@ export default function AdminInquiriesPage({ onNavigate }) {
   const handleDelete = async (inquiry) => {
     if (!window.confirm(`Delete the inquiry “${inquiry.subject}”? This cannot be undone.`)) return;
     try {
-      const response = await fetch(`${apiUrl}/api/admin/inquiries/${inquiry.id}`, {
+      await apiFetch(`/api/admin/inquiries/${inquiry.id}`, {
         method: 'DELETE',
       });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || 'Unable to delete inquiry.');
       setSelected(null);
       setFeedback({ type: 'success', message: 'Inquiry deleted.' });
       await loadInquiries();
@@ -71,7 +65,7 @@ export default function AdminInquiriesPage({ onNavigate }) {
   };
 
   return (
-    <main className="admin-app">
+    <div className="admin-page-shell"><AdminSidebar activePage="adminInquiries" currentUser={currentUser} onNavigate={onNavigate} onLogout={onLogout} inquiryCount={stats.new} /><main className="admin-app admin-page-content">
       {isLoading && <LoadingOverlay />}
       <CenterAlert type={feedback?.type} message={feedback?.message} onClose={() => setFeedback(null)} />
                      
@@ -79,7 +73,7 @@ export default function AdminInquiriesPage({ onNavigate }) {
       <section className="admin-content">
         <div className="admin-heading-row">
           <div><p className="admin-kicker">Operations overview</p><h1>Incoming inquiries</h1><p className="admin-subtitle">Keep every request moving to the right team.</p></div>
-          <div className="admin-heading-actions"><a href="/admin" className="refresh-button" onClick={(event) => { event.preventDefault(); onNavigate('admin'); }}>Dashboard</a><a href="/admin/news" className="refresh-button" onClick={(event) => { event.preventDefault(); onNavigate('adminNews'); }}>News manager</a><button type="button" className="refresh-button" onClick={() => loadInquiries()} disabled={isLoading}><span aria-hidden="true">↻</span> Refresh</button></div>
+          <div className="admin-heading-actions"><span className="admin-user-label">{currentUser?.first_name || 'Admin'}</span><button type="button" className="admin-logout-top" onClick={onLogout}>Sign out</button><a href="/admin" className="refresh-button" onClick={(event) => { event.preventDefault(); onNavigate('admin'); }}>Dashboard</a><a href="/admin/news" className="refresh-button" onClick={(event) => { event.preventDefault(); onNavigate('adminNews'); }}>News manager</a><button type="button" className="refresh-button" onClick={() => loadInquiries()} disabled={isLoading}><span aria-hidden="true">↻</span> Refresh</button></div>
         </div>
 
         <div className="stats-grid">
@@ -121,6 +115,6 @@ export default function AdminInquiriesPage({ onNavigate }) {
         <label className="note-field">Internal note<textarea defaultValue={selected.admin_note || ''} placeholder="Add a note for your team..." onBlur={(event) => { if (event.target.value !== (selected.admin_note || '')) updateInquiry(selected.id, { adminNote: event.target.value }).catch((error) => setFeedback({ type: 'error', message: error.message })); }} /></label>
         <div className="detail-footer"><a href={`mailto:${selected.email}?subject=Re: ${selected.subject}`} className="reply-button">Reply by email <span aria-hidden="true">↗</span></a><button type="button" className="delete-button" onClick={() => handleDelete(selected)}>Delete inquiry</button></div>
       </aside></div>}
-    </main>
+    </main></div>
   );
 }

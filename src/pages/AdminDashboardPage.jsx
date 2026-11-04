@@ -1,15 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import './AdminDashboardPage.css';
-import logo from '../assets/FISlogo.png';
 import { getNewsImageUrl } from '../utils/newsImage';
+import { apiFetch } from '../utils/api';
+import AdminSidebar from '../components/AdminSidebar';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const statusLabels = { new: 'New', in_progress: 'In progress', resolved: 'Resolved' };
 const formatDate = (value) => new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value));
 
-export default function AdminDashboardPage({ currentUser, onNavigate, onLogout }) {
+export default function AdminDashboardPage({ currentUser, onNavigate, onLogout, onUserUpdate }) {
   const [inquiryData, setInquiryData] = useState({ inquiries: [], stats: {} });
   const [news, setNews] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [userForm, setUserForm] = useState(null);
+  const [userSaving, setUserSaving] = useState(false);
+  const [userMessage, setUserMessage] = useState({ type: '', text: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -17,22 +22,56 @@ export default function AdminDashboardPage({ currentUser, onNavigate, onLogout }
     setIsLoading(true);
     setError('');
     try {
-      const [inquiryResponse, newsResponse] = await Promise.all([
-        fetch(`${apiUrl}/api/admin/inquiries`),
-        fetch(`${apiUrl}/api/admin/news`),
+      const [inquiryResponse, newsResponse, usersResponse] = await Promise.all([
+        apiFetch('/api/admin/inquiries'),
+        apiFetch('/api/admin/news'),
+        apiFetch('/api/admin/users'),
       ]);
-      const inquiryResult = await inquiryResponse.json().catch(() => ({}));
-      const newsResult = await newsResponse.json().catch(() => ({}));
-      if (!inquiryResponse.ok) throw new Error(inquiryResult.message || 'Unable to load inquiry data.');
-      if (!newsResponse.ok) throw new Error(newsResult.message || 'Unable to load news data.');
-      setInquiryData({ inquiries: inquiryResult.inquiries || [], stats: inquiryResult.stats || {} });
-      setNews(newsResult.news || []);
+      setInquiryData({ inquiries: inquiryResponse.inquiries || [], stats: inquiryResponse.stats || {} });
+      setNews(newsResponse.news || []);
+      setUsers(usersResponse.users || []);
     } catch (loadError) {
       setError(loadError.message);
     } finally {
       setIsLoading(false);
     }
   }, []);
+
+  const selectUser = (user) => {
+    setSelectedUserId(user.id);
+    setUserMessage({ type: '', text: '' });
+    setUserForm({
+      firstName: user.first_name,
+      lastName: user.last_name,
+      email: user.email,
+      contact: user.contact,
+      role: user.role,
+      password: '',
+    });
+  };
+
+  const saveUser = async (event) => {
+    event.preventDefault();
+    setUserSaving(true);
+    setUserMessage({ type: '', text: '' });
+    try {
+      const result = await apiFetch(`/api/admin/users/${selectedUserId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(userForm),
+      });
+      setUsers((current) => current.map((user) => user.id === result.user.id ? result.user : user));
+      if (result.user.id === currentUser.id) {
+        onUserUpdate(result.user);
+        window.sessionStorage.setItem('fis_user', JSON.stringify(result.user));
+      }
+      setUserMessage({ type: 'success', text: 'Account updated successfully.' });
+      setUserForm((current) => ({ ...current, password: '' }));
+    } catch (saveError) {
+      setUserMessage({ type: 'error', text: saveError.message });
+    } finally {
+      setUserSaving(false);
+    }
+  };
 
   useEffect(() => {
     // The dashboard fetch updates local state after the effect starts.
@@ -50,27 +89,8 @@ export default function AdminDashboardPage({ currentUser, onNavigate, onLogout }
   };
 
   return (
-    <main className="dashboard-shell">
-      <aside className="dashboard-sidebar">
-        <a className="dashboard-brand" href="/admin">
-          <img src={logo} alt="" />
-          <span><strong>Receh<span>FIS</span></strong><small>Admin workspace</small></span>
-        </a>
-        <p className="dashboard-nav-label">Workspace</p>
-        <nav className="dashboard-nav" aria-label="Admin navigation">
-          <a className="active" href="/admin" onClick={(event) => navigate(event, 'admin')}><span>⌂</span>Overview</a>
-          <a href="/admin/inquiries" onClick={(event) => navigate(event, 'adminInquiries')}><span>◫</span>Inquiries{stats.new > 0 && <b>{stats.new}</b>}</a>
-          <a href="/admin/news" onClick={(event) => navigate(event, 'adminNews')}><span>✦</span>News &amp; events</a>
-          <a href="/admin/fish-forecast" onClick={(event) => navigate(event, 'adminFishForecast')}><span>◉</span>Fish forecasting</a>
-          <p className="dashboard-nav-label secondary">General</p>
-          <a href="/" target="_blank" rel="noreferrer"><span>↗</span>View public site</a>
-        </nav>
-        <div className="dashboard-sidebar-footer">
-          <div className="dashboard-profile"><span className="dashboard-profile-avatar">{currentUser?.first_name?.charAt(0) || 'A'}</span><span><strong>{currentUser?.first_name || 'Admin'}</strong><small>Administrator</small></span><b>•••</b></div>
-          <span className="dashboard-online" />System operational
-          <button type="button" onClick={onLogout}>Sign out <span>↗</span></button>
-        </div>
-      </aside>
+    <main className="dashboard-shell admin-page-shell">
+      <AdminSidebar activePage="admin" currentUser={currentUser} onNavigate={onNavigate} onLogout={onLogout} inquiryCount={stats.new} />
 
       <section className="dashboard-main">
         <header className="dashboard-header">
@@ -107,6 +127,15 @@ export default function AdminDashboardPage({ currentUser, onNavigate, onLogout }
         <section className="dashboard-panel publications-panel">
           <div className="dashboard-panel-heading"><div><span>Content studio</span><h2>Latest publications</h2></div><a href="/admin/news">Manage library <b>→</b></a></div>
           {recentNews.length === 0 ? <div className="dashboard-empty">No news updates have been published yet.</div> : <div className="dashboard-publications">{recentNews.map((item) => <a href="/admin/news" className="dashboard-publication" key={item.id}><div className="publication-image">{item.image_url ? <img src={getNewsImageUrl(item.image_url)} alt="" /> : '✦'}</div><div><span>{item.category} · {formatDate(item.published_at)}</span><h3>{item.title}</h3><p>{item.content}</p></div></a>)}</div>}
+        </section>
+        <section className="dashboard-panel admin-users-panel">
+          <div className="dashboard-panel-heading"><div><span>Account administration</span><h2>User and admin data management</h2></div><span>{users.length} accounts</span></div>
+          <div className="admin-users-layout">
+            <div className="admin-user-list">
+              {users.map((user) => <button type="button" className={`admin-user-row ${selectedUserId === user.id ? 'selected' : ''}`} key={user.id} onClick={() => selectUser(user)}><span className="admin-user-avatar">{user.first_name?.charAt(0) || '?'}</span><span><strong>{user.first_name} {user.last_name}</strong><small>{user.email}</small></span><b>{user.role}</b></button>)}
+            </div>
+            {userForm ? <form className="admin-user-edit-form" onSubmit={saveUser}><div className="admin-user-edit-heading"><strong>Edit account</strong><button type="button" onClick={() => setUserForm(null)}>Close</button></div><label>First name<input value={userForm.firstName} onChange={(event) => setUserForm({ ...userForm, firstName: event.target.value })} required /></label><label>Last name<input value={userForm.lastName} onChange={(event) => setUserForm({ ...userForm, lastName: event.target.value })} required /></label><label>Email<input type="email" value={userForm.email} onChange={(event) => setUserForm({ ...userForm, email: event.target.value })} required /></label><label>Contact<input value={userForm.contact} onChange={(event) => setUserForm({ ...userForm, contact: event.target.value.replace(/\D/g, '').slice(0, 10) })} pattern="\d{10}" required /></label><label>Role<select value={userForm.role} onChange={(event) => setUserForm({ ...userForm, role: event.target.value })}><option value="user">User</option><option value="admin">Admin</option></select></label><label>New password <small>(optional)</small><input type="password" value={userForm.password} onChange={(event) => setUserForm({ ...userForm, password: event.target.value })} minLength="8" placeholder="Leave blank to keep current" /></label>{userMessage.text && <p className={`admin-user-message ${userMessage.type}`} role="alert">{userMessage.text}</p>}<button className="admin-profile-save" type="submit" disabled={userSaving}>{userSaving ? 'Saving...' : 'Save account'}</button></form> : <div className="admin-user-empty">Select an account to update its profile, role, or password.</div>}
+          </div>
         </section>
       </section>
     </main>

@@ -13,7 +13,10 @@ import { z } from 'zod';
 import { deleteExpiredForecastFiles, initializeDatabase, pool } from './db.js';
 
 const app = express();
-const JWT_SECRET = process.env.JWT_SECRET || 'nara-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'development-only-change-me');
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET must be configured before starting the API.');
+}
 
 const allowedOrigins = new Set([
   process.env.FRONTEND_URL,
@@ -48,14 +51,20 @@ app.use('/api/register', rateLimit({
   standardHeaders: true,
   legacyHeaders: false
 }));
+app.use('/api/login', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false
+}));
 
 const registrationSchema = z.object({
   firstName: z.string().trim().min(1),
   lastName: z.string().trim().min(1),
   email: z.string().trim().email(),
   contact: z.string().regex(/^\d{10}$/, 'Phone number must contain exactly 10 digits.'),
-  password: z.string().min(5).regex(/[A-Za-z]/, 'Password must be at least 5 characters and include a letter.'),
-  confirmPassword: z.string().min(5)
+  password: z.string().min(8).regex(/[A-Z]/, 'Password must include an uppercase letter.').regex(/[a-z]/, 'Password must include a lowercase letter.').regex(/\d/, 'Password must include a number.').regex(/[^A-Za-z0-9]/, 'Password must include a special character.'),
+  confirmPassword: z.string().min(8)
 }).superRefine((data, context) => {
   if (data.password !== data.confirmPassword) {
     context.addIssue({
@@ -68,7 +77,7 @@ const registrationSchema = z.object({
 
 const loginSchema = z.object({
   email: z.string().trim().email(),
-  password: z.string().min(5)
+  password: z.string().min(8)
 });
 
 const inquirySchema = z.object({
@@ -167,6 +176,27 @@ const sanitizeUser = (user) => ({
   created_at: user.created_at,
 });
 
+const requireAuth = (req, res, next) => {
+  const authorization = req.headers.authorization || '';
+  const [scheme, token] = authorization.split(' ');
+  if (scheme !== 'Bearer' || !token) {
+    return res.status(401).json({ success: false, message: 'Authentication is required.' });
+  }
+  try {
+    req.auth = jwt.verify(token, JWT_SECRET);
+    return next();
+  } catch {
+    return res.status(401).json({ success: false, message: 'Your session has expired. Please sign in again.' });
+  }
+};
+
+const requireAdmin = (req, res, next) => {
+  if (req.auth?.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Administrator access is required.' });
+  }
+  return next();
+};
+
 async function ensureAdminUser() {
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@nara.lk';
   const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
@@ -243,6 +273,8 @@ app.get('/api/news', async (req, res, next) => {
     next(error);
   }
 });
+
+app.use('/api/admin', requireAuth, requireAdmin);
 
 app.get('/api/admin/news', async (_req, res, next) => {
   try {
@@ -696,6 +728,93 @@ app.post('/api/login', async (req, res, next) => {
       });
     }
 
+    return next(error);
+  }
+});
+
+const profileSchema = z.object({
+  firstName: z.string().trim().min(1).max(120),
+  lastName: z.string().trim().min(1).max(120),
+  contact: z.string().regex(/^\d{10}$/, 'Phone number must contain exactly 10 digits.')
+});
+
+const adminUserUpdateSchema = z.object({
+  firstName: z.string().trim().min(1).max(120),
+  lastName: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(255),
+  contact: z.string().regex(/^\d{10}$/, 'Phone number must contain exactly 10 digits.'),
+  role: z.enum(['user', 'admin']),
+  password: z.string().optional().refine(
+    (value) => !value || (value.length >= 8 && /[A-Z]/.test(value) && /[a-z]/.test(value) && /\d/.test(value) && /[^A-Za-z0-9]/.test(value)),
+    'Password must be at least 8 characters with uppercase, lowercase, number, and special character.'
+  )
+});
+
+app.get('/api/admin/users', async (_req, res, next) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, first_name, last_name, email, contact, role, created_at
+       FROM users ORDER BY created_at DESC`
+    );
+    return res.json({ success: true, users: result.rows.map(sanitizeUser) });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.patch('/api/admin/users/:id', async (req, res, next) => {
+  try {
+    const userId = z.coerce.number().int().positive().parse(req.params.id);
+    const changes = adminUserUpdateSchema.parse(req.body);
+    if (userId === req.auth.id && changes.role !== 'admin') {
+      return res.status(400).json({ success: false, message: 'You cannot remove your own administrator role.' });
+    }
+
+    const passwordHash = changes.password ? hashPassword(changes.password) : null;
+    const result = await pool.query(
+      `UPDATE users
+       SET first_name = $1, last_name = $2, email = $3, contact = $4, role = $5,
+           password_hash = COALESCE($6, password_hash),
+           token = CASE WHEN $6 IS NOT NULL OR email IS DISTINCT FROM $3 THEN NULL ELSE token END
+       WHERE id = $7
+       RETURNING id, first_name, last_name, email, contact, role, created_at`,
+      [changes.firstName, changes.lastName, changes.email.toLowerCase(), changes.contact, changes.role, passwordHash, userId]
+    );
+    if (!result.rows[0]) return res.status(404).json({ success: false, message: 'User account not found.' });
+    return res.json({ success: true, user: sanitizeUser(result.rows[0]) });
+  } catch (error) {
+    if (error.name === 'ZodError') return res.status(400).json({ success: false, message: error.issues[0]?.message || 'Invalid account details.' });
+    if (error.code === '23505') return res.status(409).json({ success: false, message: 'An account with this email already exists.' });
+    return next(error);
+  }
+});
+
+app.get('/api/me', requireAuth, async (req, res, next) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, first_name, last_name, email, contact, role, created_at FROM users WHERE id = $1',
+      [req.auth.id]
+    );
+    if (!result.rows[0]) return res.status(404).json({ success: false, message: 'User account not found.' });
+    return res.json({ success: true, user: sanitizeUser(result.rows[0]) });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.patch('/api/me', requireAuth, async (req, res, next) => {
+  try {
+    const profile = profileSchema.parse(req.body);
+    const result = await pool.query(
+      `UPDATE users SET first_name = $1, last_name = $2, contact = $3
+       WHERE id = $4
+       RETURNING id, first_name, last_name, email, contact, role, created_at`,
+      [profile.firstName, profile.lastName, profile.contact, req.auth.id]
+    );
+    if (!result.rows[0]) return res.status(404).json({ success: false, message: 'User account not found.' });
+    return res.json({ success: true, user: sanitizeUser(result.rows[0]) });
+  } catch (error) {
+    if (error.name === 'ZodError') return res.status(400).json({ success: false, message: error.issues[0]?.message || 'Invalid profile details.' });
     return next(error);
   }
 });

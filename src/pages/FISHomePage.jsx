@@ -3,6 +3,7 @@ import { MapContainer, Polygon, TileLayer, useMap } from 'react-leaflet';
 import FISHeader from '../components/FISHeader';
 import FISFooter from '../components/FISFooter';
 import FishForecastMap from '../components/FishForecastMap';
+import ScrollDownPrompt from '../components/ScrollDownPrompt';
 import { DEFAULT_NEWS_IMAGE, getNewsImageUrl } from '../utils/newsImage';
 import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf';
 import 'leaflet/dist/leaflet.css';
@@ -15,7 +16,7 @@ const services = [
   { image: '/services/TF_8K.png', title: 'Fish Forecasting', text: 'Explore daily marine conditions and habitat suitability maps to support safer fishing decisions.', page: 'fishForecast' },
   { image: '/services/Oceanographic.jpg', title: 'Harbour Boundary Mapping', text: 'View mapped harbour boundaries and coastal locations through the interactive GIS map.', page: 'harbourBoundary' },
   { image: '/services/Adam\'s Bridge Marine National Park.jpg', title: 'Marine Protected Areas', text: 'Discover Sri Lanka’s marine parks, sanctuaries, conservation areas, and mapped locations.', page: 'marineProtectedAreas' },
-  { image: '', title: 'Weekly Forecast Summary', text: 'Review the weekly marine forecast summary for planning fishing activity across Sri Lanka.', page: 'weeklySummary' },
+  { image: '/services/Sri Lanka Tuna Fishing Forecast Map.png', title: 'Weekly Forecast Summary', text: 'Review the weekly marine forecast summary for planning fishing activity across Sri Lanka.', page: 'weeklySummary' },
   { image: '/services/news.png', title: 'News & Events', text: 'Stay informed about fisheries advisories, announcements, workshops, and events.', page: 'news' },
   { image: '/nara_cover.jpg', title: 'Contact & Information Support', text: 'Connect with the Fisheries Information Center for research support and information requests.', page: 'contact' },
 ];
@@ -223,6 +224,7 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
             />
           ))}
           <div className="absolute inset-0 bg-gradient-to-b from-[#061d3d]/90 via-[#061d3d]/55 to-[#061d3d]/88 sm:bg-gradient-to-r sm:from-[#061d3d]/90 sm:via-[#061d3d]/72 sm:to-[#061d3d]/40" />
+          <ScrollDownPrompt />
 
           <div className="relative mx-auto flex min-h-[calc(100dvh-68px)] max-w-[1440px] items-start px-4 py-8 max-[375px]:min-h-[calc(100dvh-64px)] max-[375px]:px-3 max-[375px]:pt-10 max-[375px]:pb-5 sm:h-full sm:min-h-0 sm:items-center sm:px-6 sm:py-0 lg:px-8">
             <div className="grid w-full items-start gap-7 sm:items-center sm:gap-6 lg:grid-cols-[1.5fr_0.8fr]">
@@ -340,7 +342,7 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
                       <img
                         src={service.image}
                         alt={service.title}
-                        className="h-full w-full object-cover grayscale-[15%] transition duration-300 group-hover:scale-105 group-hover:grayscale-0"
+                        className="h-full w-full object-cover grayscale-[15%] transition duration-300 group-hover:grayscale-0"
                       />
                     </div>
 

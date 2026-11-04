@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { fishSpecies, forecastUpdatedKey } from '../data/fishForecast';
 import FishForecastMap from '../components/FishForecastMap';
 import './AdminFishForecastPage.css';
+import { apiFetch } from '../utils/api';
+import AdminSidebar from '../components/AdminSidebar';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const today = new Date().toISOString().slice(0, 10);
 
 export default function AdminFishForecastPage({ currentUser, onNavigate, onLogout }) {
@@ -37,11 +38,7 @@ export default function AdminFishForecastPage({ currentUser, onNavigate, onLogou
     formData.append('forecastDate', date);
     files.forEach((file) => formData.append('shapes', file));
     try {
-      const response = await fetch(`${apiUrl}/api/admin/fish-forecast-shapes`, { method: 'POST', body: formData });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.message || 'The shapefiles could not be added.');
-      }
+      const result = await apiFetch('/api/admin/fish-forecast-shapes', { method: 'POST', body: formData });
       setStagedFiles(result.files || []);
       setStatus(`${result.file_count} file${result.file_count === 1 ? '' : 's'} added. Click Publish map when ready.`);
     } catch (error) {
@@ -55,9 +52,7 @@ export default function AdminFishForecastPage({ currentUser, onNavigate, onLogou
     const stagedFile = stagedFiles[index];
     if (stagedFile) {
       try {
-        const response = await fetch(`${apiUrl}/api/admin/fish-forecast-shapes/${species}/${stagedFile.id}`, { method: 'DELETE' });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(result.message || 'The shapefile could not be removed.');
+        await apiFetch(`/api/admin/fish-forecast-shapes/${species}/${stagedFile.id}`, { method: 'DELETE' });
         setStagedFiles((current) => current.filter((_, fileIndex) => fileIndex !== index));
       } catch (error) {
         setStatus(error.message);
@@ -73,13 +68,10 @@ export default function AdminFishForecastPage({ currentUser, onNavigate, onLogou
     setIsSaving(true);
     setStatus('');
     try {
-      const response = await fetch(`${apiUrl}/api/admin/fish-forecast-shapes/publish`, {
+      await apiFetch('/api/admin/fish-forecast-shapes/publish', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ species, forecastDate: date }),
       });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || 'The map could not be published.');
       setIsPublished(true);
       window.localStorage.setItem(forecastUpdatedKey, JSON.stringify({ species, forecastDate: date, updatedAt: Date.now() }));
       window.dispatchEvent(new Event('fis-forecast-updated'));
@@ -92,14 +84,10 @@ export default function AdminFishForecastPage({ currentUser, onNavigate, onLogou
   };
 
   return (
-    <main className="admin-forecast-shell">
-      <aside className="admin-forecast-sidebar">
-        <div className="admin-forecast-brand"><span>FIS</span><strong>Forecast studio</strong><small>Ocean intelligence workspace</small></div>
-        <nav><button type="button" onClick={() => onNavigate('admin')}>Overview</button><button type="button" className="active">Fish forecasting</button><button type="button" onClick={() => onNavigate('adminNews')}>News &amp; events</button><button type="button" onClick={() => onNavigate('adminInquiries')}>Inquiries</button></nav>
-        <div className="admin-forecast-sidebar-bottom"><span>{currentUser?.first_name || 'Admin'}</span><button type="button" onClick={onLogout}>Sign out</button></div>
-      </aside>
+    <main className="admin-forecast-shell admin-page-shell">
+      <AdminSidebar activePage="adminFishForecast" currentUser={currentUser} onNavigate={onNavigate} onLogout={onLogout} />
       <section className="admin-forecast-main">
-        <header className="admin-forecast-header"><div><p>Decision support / Data studio</p><h1>Publish fish forecast areas</h1><span>Upload a polygon shapefile for each species to publish its fishing areas.</span></div><a href="/services/fish-forecast" target="_blank" rel="noreferrer">View public map ↗</a></header>
+        <header className="admin-forecast-header"><div><p>Decision support / Data studio</p><h1>Publish fish forecast areas</h1><span>Upload a polygon shapefile for each species to publish its fishing areas.</span></div><div className="admin-forecast-header-actions"><button type="button" className="admin-logout-top" onClick={onLogout}>Sign out</button><a href="/services/fish-forecast" target="_blank" rel="noreferrer">View public map ↗</a></div></header>
         <div className="admin-forecast-grid">
           <form className="admin-forecast-form" onSubmit={handleAdd}>
             <div className="admin-form-section"><label>1. Fish species<select value={species} onChange={(event) => handleSpeciesChange(event.target.value)}>{Object.entries(fishSpecies).map(([key, item]) => <option value={key} key={key}>{item.label}</option>)}</select></label><p>{fishSpecies[species].description}</p></div>

@@ -3,7 +3,7 @@ import './Signup.css'
 import LoadingOverlay from './LoadingOverlay'
 import CenterAlert from './CenterAlert'
 
-function Signup({ onNavigate }) {
+function Signup({ onNavigate, onSignupSuccess, onClose }) {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -19,7 +19,7 @@ function Signup({ onNavigate }) {
     const payload = Object.fromEntries(formData.entries())
 
     try {
-      const response = await fetch('/api/register', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -31,7 +31,7 @@ function Signup({ onNavigate }) {
       }
 
       setSubmitted(true)
-      form.reset()
+      onSignupSuccess?.(payload.email)
     } catch (requestError) {
       setError(requestError.message || 'Unable to create your account.')
     } finally {
@@ -40,7 +40,7 @@ function Signup({ onNavigate }) {
   }
 
   return (
-    <main className="signup-page">
+    <main className="signup-page auth-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose?.() }}>
       {isSubmitting && <LoadingOverlay message="Creating account..." />}
       <CenterAlert
         type={error ? 'error' : submitted ? 'success' : undefined}
@@ -49,6 +49,7 @@ function Signup({ onNavigate }) {
       />
       
       <section className="signup-card" aria-label="Create your account">
+        <button className="auth-modal-close" type="button" onClick={onClose} aria-label="Close sign up">×</button>
         <div className="image-panel">
           <img src="/30342.jpg" alt="Fishing boat on calm blue water" />
         </div>
@@ -56,7 +57,7 @@ function Signup({ onNavigate }) {
         <div className="form-panel">
           <div className="form-heading">
             <h1>Get Started Now</h1>
-            <p>Create Your Account</p>
+            
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -80,22 +81,17 @@ function Signup({ onNavigate }) {
             </label>
             <label>
               Password
-              <input type="password" name="password" placeholder="Enter your password" minLength="5" pattern=".*[A-Za-z].*" title="Use at least 5 characters and one letter" required />
+              <input type="password" name="password" placeholder="At least 8 chars, upper/lower/number/symbol" minLength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" title="Use at least 8 characters with uppercase, lowercase, number, and special character" required />
             </label>
             <label>
               Confirm Password
-              <input type="password" name="confirmPassword" placeholder="Re-enter the password" minLength="5" required />
+              <input type="password" name="confirmPassword" placeholder="Re-enter the password" minLength="8" required />
             </label>
 
             <button className="primary-button" type="submit">
               {isSubmitting ? 'Creating Account...' : submitted ? 'Account Created' : 'Sign Up'}
             </button>
           </form>
-
-          <button className="google-button" type="button">
-            <span className="google-mark" aria-hidden="true">G</span>
-            Sign in with Google
-          </button>
 
           <p className="login-prompt">
             Already have an account? <a href="#login" onClick={(event) => { event.preventDefault(); onNavigate('login') }}>Sign In Here</a>

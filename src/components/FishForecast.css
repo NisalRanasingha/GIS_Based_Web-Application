@@ -36,10 +36,15 @@
 .forecast-timeline button.active strong { color: #fff; }
 .forecast-map { position:relative; height: 480px; }
 .forecast-map .leaflet-container { height: 100%; width: 100%; background: #dcecf2; }
+.forecast-summary-map-label { position:absolute; z-index:400; top:50%; left:50%; pointer-events:none; transform:translate(-50%,-50%); color:#fff; font-size:clamp(1rem,2.4vw,2rem); font-weight:900; letter-spacing:.12em; opacity:.4; text-align:center; text-shadow:-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; white-space:nowrap; }
 .forecast-map-center-button { position:absolute; z-index:401; top:10px; right:10px; }
 .forecast-map-center-button:disabled { cursor:not-allowed; opacity:.6; }
 .forecast-map .leaflet-tooltip { border: 0; border-radius: 5px; background: #123d7b; color: #fff; box-shadow: 0 2px 8px rgba(16, 61, 93, .2); font-size: .72rem; }
 .forecast-map .leaflet-tooltip-top::before { border-top-color: #123d7b; }
+.forecast-area-popup .leaflet-popup-content { margin: 12px 14px; color: #123d7b; font-size: .75rem; line-height: 1.4; }
+.forecast-area-popup .leaflet-popup-content strong, .forecast-area-popup .leaflet-popup-content span, .forecast-area-popup .leaflet-popup-content small { display:block; }
+.forecast-area-popup .leaflet-popup-content strong { margin-bottom:3px; color:#123d7b; font-size:.85rem; }
+.forecast-area-popup .leaflet-popup-content small { margin-top:4px; color:#637989; font-size:.68rem; }
 .forecast-map-note { margin: 0; padding: 12px 20px 17px; color: #6b7f8e; font-size: .8rem; line-height: 1.5; }
 .forecast-area-details { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 14px 20px; border-top: 1px solid #dfeaf0; background: #f7fbfd; }
 .forecast-area-details div { display: grid; gap: 3px; min-width: 0; }

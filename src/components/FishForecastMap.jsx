@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CircleMarker, GeoJSON, MapContainer, Polyline, TileLayer, Tooltip, useMap } from 'react-leaflet';
+import { CircleMarker, GeoJSON, MapContainer, Polyline, Popup, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import yellowfinImage from '../assets/Yellowfin Tuna in Deep Blue Waters.png';
 import bigeyeImage from '../assets/Bigeye Tuna in Deep Blue Waters.png';
 import skipjackImage from '../assets/Skipjack Tuna in Deep Blue Waters.png';
@@ -255,6 +255,16 @@ const routeDistanceKm = (route) => route.slice(1).reduce((total, point, index) =
   total + distanceKm(route[index], { lat: point[0], lng: point[1] })
 ), 0);
 
+const getShapeCenter = (shape) => {
+  if (shape.type === 'point') return shape.coordinates;
+  const points = shape.coordinates.flat();
+  if (!points.length) return null;
+  return points.reduce((result, point) => [result[0] + point[0], result[1] + point[1]], [0, 0])
+    .map((value) => value / points.length);
+};
+
+const formatCoordinate = (value) => Number.isFinite(value) ? value.toFixed(5) : '—';
+
 export default function FishForecastMap({
   forecasts = [],
   compact = false,
@@ -381,13 +391,17 @@ export default function FishForecastMap({
           {shapes.map((shape, index) => {
             const key = `${shape.file}-${index}`;
             const summaryItem = getSummarySpecies(shape);
+            const shapeCenter = getShapeCenter(shape);
+            const fishLabel = summaryItem?.label || fishSpecies[species]?.label || `${species} tuna`;
             const tooltip = (
-              <Tooltip direction="top" sticky>
+              <Popup className="forecast-area-popup" maxWidth={280} minWidth={190} autoPan autoPanPadding={[24, 24]}>
                 {summaryItem && <img className="forecast-tooltip-fish" src={speciesImages[shape.species]} alt="" />}
-                <strong>{summaryItem?.label || `${species} tuna`}</strong>
+                <strong>{fishLabel}</strong>
                 <span>{shape.region} fishing area</span>
+                {shapeCenter && <span>Latitude: {formatCoordinate(shapeCenter[0])}</span>}
+                {shapeCenter && <span>Longitude: {formatCoordinate(shapeCenter[1])}</span>}
                 <small>{shape.forecastDate ? `Published ${new Date(shape.forecastDate).toLocaleDateString('en', { day: '2-digit', month: 'short', year: 'numeric' })}` : 'Published forecast area'}</small>
-              </Tooltip>
+              </Popup>
             );
             return (
               <GeoJSON
@@ -416,6 +430,7 @@ export default function FishForecastMap({
           )}
           {route.length > 1 && !weeklySummary && <Polyline positions={route} pathOptions={{ color: '#123d7b', dashArray: '8 8', weight: 3 }} />}
         </MapContainer>
+        {weeklySummary && <div className="forecast-summary-map-label">LAST 7 DAYS SUMMARY MAP</div>}
       </div>
       {!compact && !weeklySummary && selectedShape && (
         <section className="forecast-area-details" aria-live="polite">
