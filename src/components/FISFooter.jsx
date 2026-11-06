@@ -19,7 +19,7 @@ export default function FISFooter({ onNavigate }) {
       <div className="mx-auto grid max-w-[1440px] gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_1fr_1.1fr] lg:px-8">
         <div>
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden bg-transparent">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-white p-1">
               <img src={logo} alt="FIS logo" className="h-11 w-11 object-contain" />
             </div>
             <div>
@@ -30,8 +30,9 @@ export default function FISFooter({ onNavigate }) {
           <p className="max-w-md text-[13px] leading-7 text-white/70">
             The Fisheries Information Center at NARA provides research, data, and advisory services to support Sri Lanka's fisheries and aquatic resources sector.
           </p>
-          <div className="mx-auto mt-5 flex h-28 w-24 items-center justify-center rounded-sm bg-white p-2">
-            <img src="/services/Emblem_of_Sri_Lanka.svg" alt="Emblem of Sri Lanka" className="h-full w-full object-contain" />
+          <div className="mx-auto mt-5 flex h-28 w-56 items-center justify-between gap-5 rounded-sm bg-white px-5 py-3">
+            <img src="/services/Emblem_of_Sri_Lanka.svg" alt="Government emblem of Sri Lanka" className="h-full w-20 object-contain" />
+            <img src="/services/NARA.jpg" alt="NARA logo" className="h-full w-20 object-contain" />
           </div>
         </div>
 

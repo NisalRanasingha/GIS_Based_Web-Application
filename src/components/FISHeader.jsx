@@ -64,18 +64,17 @@ export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
   return (
     <header className="sticky top-0 z-[1000] w-full bg-[#f3f7fb] shadow-sm">
       <div className="border-b border-slate-200 bg-white/70 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-2 px-3 py-2.5 sm:gap-4 sm:px-6 sm:py-4 lg:px-8">
-          <div className="flex min-w-0 items-center gap-2 sm:gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden bg-transparent sm:h-[70px] sm:w-[70px]">
-              <img src={logo} alt="FIS logo" className="h-12 w-12 object-contain sm:h-[70px] sm:w-[70px]" />
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-1 px-1 py-0.5 sm:gap-2 sm:px-2 sm:py-1 lg:px-4">
+          <div className="flex min-w-0 flex-row items-center gap-1 sm:gap-2">
+            <div className="flex h-[70px] w-[70px] shrink-0 items-center justify-center overflow-hidden bg-transparent sm:h-[104px] sm:w-[104px]">
+              <img src={logo} alt="FIS logo" className="h-[70px] w-[70px] object-contain sm:h-[104px] sm:w-[104px]" />
             </div>
 
-            <div className="min-w-0">
-              <div className="whitespace-nowrap text-[7px] font-semibold tracking-[0.05em] text-[#0a3d72] sm:text-[9px] sm:tracking-[0.08em] lg:text-[0.85rem]">National Aquatic Resources Research and Development Agency</div>
-              <div className="mt-0.5 text-[14px] font-medium leading-tight text-[#103d7a] sm:mt-1 sm:text-xl lg:text-[1.8rem]">
+            <div className="min-w-0 -translate-y-1 self-center">
+              <div className="whitespace-nowrap text-[6px] font-semibold tracking-[0.04em] text-[#0a3d72] sm:text-[8px] sm:tracking-[0.06em] lg:text-[0.7rem]">National Aquatic Resources Research and Development Agency</div>
+              <div className="mt-0 text-[12px] font-medium leading-tight text-[#103d7a] sm:mt-0.5 sm:text-base lg:text-[1.45rem]">
                 FISHERIES INFORMATION CENTER - FIS
               </div>
-              <div className="mt-0.5 text-[8px] text-slate-500 sm:mt-1 sm:text-[11px]">Ministry of Fisheries, Sri Lanka</div>
             </div>
           </div>
 
