@@ -4,17 +4,18 @@
 .harbour-legend { display: flex; align-items: center; gap: 9px; white-space: nowrap; color: #315d78; font-size: .9rem; }
 .legend-marker { position: relative; width: 13px; height: 17px; border: 2px solid #087bc4; border-radius: 50% 50% 50% 0; background: #0c8bd6; transform: rotate(-45deg); }
 .legend-marker::after { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: white; content: ''; inset: 4px; }
-.legend-line { width: 28px; border-top: 3px dashed #f0c400; margin-left: 10px; }
+.legend-line { width: 28px; border-top: 3px solid #123d7b; margin-left: 10px; }
 .harbour-content { width: min(1320px, calc(100% - 48px)); margin: 28px auto 42px; }
-.harbour-map-shell { position: relative; z-index: 0; isolation: isolate; overflow: hidden; border: 1px solid #c9d9e5; border-radius: 14px; box-shadow: 0 12px 30px #174c6b1c; }
-.harbour-map { height: min(70vh, 680px); min-height: 460px; width: 100%; background: #dcecf2; }
+.harbour-map-shell { position: relative; z-index: 0; isolation: isolate; overflow: hidden; border: 1px solid #173c4b; border-radius: 2px; box-shadow: 0 12px 30px #174c6b1c; }
+.harbour-map { height: min(70vh, 680px); min-height: 460px; width: 100%; background: #1FC0DA; }
 .harbour-map.leaflet-container { height: min(70vh, 680px); min-height: 460px; width: 100%; }
+.harbour-map .leaflet-tile-pane { opacity: 1; filter: none; }
 .harbour-alert, .harbour-loading { padding: 18px; border-radius: 8px; background: #fff; color: #735a11; }
 .harbour-alert { border-left: 4px solid #d59d16; }
 .harbour-tooltip { display: grid; gap: 5px; min-width: 175px; color: #183b5b; }
 .harbour-tooltip strong { color: #064e9b; font-size: 1rem; }
 .harbour-marker-icon { border: 0; background: transparent; }
-.harbour-marker-pin { position: relative; display: block; width: 30px; height: 30px; border: 2px solid #087bc4; border-radius: 50% 50% 50% 0; background: #0c8bd6; box-shadow: 0 2px 4px rgb(0 40 80 / 35%); transform: rotate(-45deg); }
-.harbour-marker-pin::after { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: transparent; content: ''; }
-.harbour-marker-hole { position: absolute; z-index: 1; width: 12px; height: 12px; border-radius: 50%; background: white; inset: 7px; }
+.harbour-marker-pin { position: relative; display: block; width: 15px; height: 15px; border: 1px solid #6f240e; border-radius: 50% 50% 50% 0; background: #a63c1c; box-shadow: 0 1px 2px rgb(0 40 80 / 35%); transform: rotate(-45deg); }
+.harbour-marker-pin::after { position: absolute; width: 15px; height: 15px; border-radius: 50%; background: transparent; content: ''; }
+.harbour-marker-hole { position: absolute; z-index: 1; width: 5px; height: 5px; border-radius: 50%; background: white; inset: 4px; }
 @media (max-width: 700px) { .harbour-content { width: calc(100% - 28px); } .harbour-map, .harbour-map.leaflet-container { height: 230px; min-height: 230px; } }

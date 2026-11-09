@@ -229,6 +229,38 @@ app.get('/api/health', async (_req, res) => {
   res.json({ success: true, message: 'Backend is running' });
 });
 
+app.get('/api/marine-boundaries', async (_req, res, next) => {
+  try {
+    const boundaryQuery = new URLSearchParams({
+      service: 'WFS',
+      version: '1.0.0',
+      request: 'GetFeature',
+      typeName: 'eez_boundaries',
+      cql_filter: "eez1 LIKE '%Sri Lanka%' OR eez2 LIKE '%Sri Lanka%'",
+      outputFormat: 'application/json',
+    });
+    const zoneQuery = new URLSearchParams({
+      service: 'WFS',
+      version: '1.0.0',
+      request: 'GetFeature',
+      typeName: 'eez',
+      cql_filter: 'mrgid=8346',
+      outputFormat: 'application/json',
+    });
+    const [boundaryResponse, zoneResponse] = await Promise.all([
+      fetch(`https://geo.vliz.be/geoserver/MarineRegions/wfs?${boundaryQuery}`),
+      fetch(`https://geo.vliz.be/geoserver/MarineRegions/wfs?${zoneQuery}`),
+    ]);
+    if (!boundaryResponse.ok || !zoneResponse.ok) {
+      throw new Error(`Marine Regions returned ${boundaryResponse.status}/${zoneResponse.status}.`);
+    }
+    const [boundaries, zone] = await Promise.all([boundaryResponse.json(), zoneResponse.json()]);
+    return res.json({ boundaries, zone: zone.features?.[0] || null });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 app.get('/api/harbour-boundaries', async (_req, res, next) => {
   try {
     const [locations, boundaries] = await Promise.all([
