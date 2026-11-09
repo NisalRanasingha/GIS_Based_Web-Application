@@ -140,15 +140,8 @@ export default function HarbourBoundaryPage({ onNavigate, currentUser, onLogout 
     <div className="harbour-page">
       <FISHeader page="harbourBoundary" onNavigate={onNavigate} currentUser={currentUser} onLogout={onLogout} />
       <main>
-        <section className="harbour-hero">
-          <div>
-            <p className="fics-page-banner-eyebrow">Fisheries Information Center · Navigation support</p>
-            <h1>Harbour boundary navigator</h1>
-            <p>Hover over a blue harbour marker to see its minimum distance and bearing to the nearest managed boundary.</p>
-          </div>
-          <div className="harbour-legend"><span className="legend-marker" /> Harbour <span className="legend-line" /> Boundary</div>
-        </section>
         <section className="harbour-content">
+          <div className="harbour-legend"><span className="legend-marker" /> Harbour <span className="legend-line" /> Boundary</div>
           {error && <div className="harbour-alert">{error}</div>}
           {isLoading ? <div className="harbour-loading">Loading harbour and boundary data…</div> : (
             <div className="harbour-map-shell">

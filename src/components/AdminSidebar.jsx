@@ -5,7 +5,7 @@ const links = [
   { page: 'admin', path: '/admin', icon: '⌂', label: 'Overview' },
   { page: 'adminInquiries', path: '/admin/inquiries', icon: '◫', label: 'Inquiries' },
   { page: 'adminNews', path: '/admin/news', icon: '✦', label: 'News & events' },
-  { page: 'adminFishForecast', path: '/admin/fish-forecast', icon: '◉', label: 'Fish forecasting' },
+  { page: 'adminFishForecast', path: '/admin/fish-forecast', icon: '◉', label: 'Tuna forecasting' },
 ];
 
 export default function AdminSidebar({ activePage, currentUser, onNavigate, onLogout, inquiryCount = 0 }) {

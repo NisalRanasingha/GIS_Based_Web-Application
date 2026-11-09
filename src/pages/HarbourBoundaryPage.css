@@ -1,10 +1,7 @@
 .harbour-page { min-height: 100vh; display: flex; flex-direction: column; background: #edf3f7; color: #123d7b; }
 .harbour-page > header { z-index: 1000; }
 .harbour-page main { flex: 1; }
-.harbour-hero { display: flex; justify-content: space-between; gap: 24px; align-items: end; padding: 38px max(24px, calc((100% - 1320px) / 2)); color: white; border-top: 4px solid #f0b429; background: linear-gradient(120deg, #124a78, #087b86); }
-.harbour-hero h1 { margin: 6px 0; font-size: clamp(2rem, 4vw, 3rem); }
-.harbour-hero p:last-child { max-width: 650px; margin: 0; color: #d9eff0; line-height: 1.5; }
-.harbour-legend { display: flex; align-items: center; gap: 9px; white-space: nowrap; color: #fff; font-size: .9rem; }
+.harbour-legend { display: flex; align-items: center; gap: 9px; white-space: nowrap; color: #315d78; font-size: .9rem; }
 .legend-marker { position: relative; width: 13px; height: 17px; border: 2px solid #087bc4; border-radius: 50% 50% 50% 0; background: #0c8bd6; transform: rotate(-45deg); }
 .legend-marker::after { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: white; content: ''; inset: 4px; }
 .legend-line { width: 28px; border-top: 3px dashed #f0c400; margin-left: 10px; }
@@ -20,4 +17,4 @@
 .harbour-marker-pin { position: relative; display: block; width: 30px; height: 30px; border: 2px solid #087bc4; border-radius: 50% 50% 50% 0; background: #0c8bd6; box-shadow: 0 2px 4px rgb(0 40 80 / 35%); transform: rotate(-45deg); }
 .harbour-marker-pin::after { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: transparent; content: ''; }
 .harbour-marker-hole { position: absolute; z-index: 1; width: 12px; height: 12px; border-radius: 50%; background: white; inset: 7px; }
-@media (max-width: 700px) { .harbour-hero { display: block; padding: 28px 20px; } .harbour-legend { margin-top: 20px; } .harbour-content { width: calc(100% - 28px); } .harbour-map, .harbour-map.leaflet-container { height: 230px; min-height: 230px; } }
+@media (max-width: 700px) { .harbour-content { width: calc(100% - 28px); } .harbour-map, .harbour-map.leaflet-container { height: 230px; min-height: 230px; } }

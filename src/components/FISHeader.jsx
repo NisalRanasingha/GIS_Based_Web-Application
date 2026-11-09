@@ -12,6 +12,9 @@ const pageByLabel = {
   'Contact Us': 'contact',
 };
 
+const facebookUrl = 'https://www.facebook.com/share/1DJ9mdrkYb/';
+const whatsappUrl = 'https://chat.whatsapp.com/DGsdYy1CigCLDLbD5QthsT';
+
 export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [servicesMenuOpen, setServicesMenuOpen] = useState(false);
@@ -61,10 +64,12 @@ export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
     setServicesMenuOpen(false);
   };
 
+  const utilityButtonClass = 'header-utility-button';
+
   return (
     <header className="sticky top-0 z-[1000] w-full bg-[#f3f7fb] shadow-sm">
       <div className="border-b border-slate-200 bg-white/70 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-1 px-1 py-0.5 sm:gap-2 sm:px-2 sm:py-1 lg:px-4">
+        <div className="header-main-row mx-auto flex max-w-[1440px] items-center justify-between gap-1 px-1 py-0.5 sm:gap-2 sm:px-2 sm:py-1 lg:px-4">
           <div className="flex min-w-0 flex-row items-center gap-1 sm:gap-2">
             <div className="flex h-[70px] w-[70px] shrink-0 items-center justify-center overflow-hidden bg-transparent sm:h-[104px] sm:w-[104px]">
               <img src={logo} alt="FIS logo" className="h-[70px] w-[70px] object-contain sm:h-[104px] sm:w-[104px]" />
@@ -78,12 +83,26 @@ export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
             </div>
           </div>
 
+          <div className="header-utilities">
+            <a href={facebookUrl} target="_blank" rel="noreferrer" className={utilityButtonClass} aria-label="Facebook" title="Facebook">
+              <img src="/services/facebook-color-svgrepo-com.svg" alt="" aria-hidden="true" />
+            </a>
+            <a href={whatsappUrl} target="_blank" rel="noreferrer" className={utilityButtonClass} aria-label="WhatsApp" title="WhatsApp">
+              <img src="/services/whatsapp-whats-app-svgrepo-com.svg" alt="" aria-hidden="true" />
+            </a>
+            <a href="tel:0112520193" className={utilityButtonClass} aria-label="Call 0112 520 193" title="0112 520 193">
+              <img src="/services/phone-call-svgrepo-com.svg" alt="" aria-hidden="true" />
+            </a>
+            <a href="mailto:tuna.forecast@gmail.com" className={utilityButtonClass} aria-label="Email tuna.forecast@gmail.com" title="tuna.forecast@gmail.com">
+              <img src="/services/mail-bookmark-svgrepo-com.svg" alt="" aria-hidden="true" />
+            </a>
+          </div>
           <button
             type="button"
             aria-label="Toggle menu"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((prev) => !prev)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0d3b7c]/15 bg-white text-lg text-[#0d3b7c] shadow-sm transition hover:bg-slate-50 md:hidden sm:h-11 sm:w-11 sm:text-xl"
+            className="header-menu-toggle inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#0d3b7c]/15 bg-white text-lg text-[#0d3b7c] shadow-sm transition hover:bg-slate-50 md:hidden sm:h-11 sm:w-11 sm:text-xl"
           >
             {menuOpen ? '×' : '☰'}
           </button>
@@ -97,7 +116,7 @@ export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
               <button
                 key={item}
                 onClick={() => handleNav(item)}
-                className={`whitespace-nowrap px-4 py-4 text-[12px] font-normal transition sm:px-5 ${
+                className={`whitespace-nowrap px-4 py-2.5 text-[12px] font-normal transition sm:px-5 ${
                 isActive(item)
                   ? 'border-b-2 border-[#f4b740] text-white'
                   : 'text-white/80 hover:bg-white/5 hover:text-white'
@@ -114,7 +133,7 @@ export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
                 onClick={() => onNavigate('services')}
                 onMouseEnter={showServicesMenu}
                 onMouseLeave={scheduleServicesMenuClose}
-                className="whitespace-nowrap px-4 py-4 text-[12px] font-normal text-white/80 transition hover:bg-white/5 hover:text-white sm:px-5"
+                className="whitespace-nowrap px-4 py-2.5 text-[12px] font-normal text-white/80 transition hover:bg-white/5 hover:text-white sm:px-5"
               >
                 Services
                 <span className="ml-1 text-[10px]">⌄</span>
@@ -160,7 +179,7 @@ export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
             onMouseEnter={keepServicesMenuOpen}
             onMouseLeave={scheduleServicesMenuClose}
           >
-            <button type="button" onClick={() => { onNavigate('fishForecast'); setServicesMenuOpen(false); }} className="block w-full px-4 py-3 text-left text-sm text-[#123d7b] hover:bg-slate-100">Fish forecasting</button>
+            <button type="button" onClick={() => { onNavigate('fishForecast'); setServicesMenuOpen(false); }} className="block w-full px-4 py-3 text-left text-sm text-[#123d7b] hover:bg-slate-100">Tuna forecasting</button>
             <button type="button" onClick={() => { onNavigate('harbourBoundary'); setServicesMenuOpen(false); }} className="block w-full px-4 py-3 text-left text-sm text-[#123d7b] hover:bg-slate-100">Harbour boundary navigator</button>
           </div>,
           document.body
@@ -184,7 +203,7 @@ export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
                 ))}
                 <div className="mt-1 border-t border-white/10 pt-1">
                   <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[#f4b740]">Services</div>
-                  <button type="button" onClick={() => { onNavigate('fishForecast'); setMenuOpen(false); }} className="flex w-full rounded-md px-3 py-2.5 text-left text-sm text-white/80 hover:bg-white/5 hover:text-white">Fish forecasting</button>
+                  <button type="button" onClick={() => { onNavigate('fishForecast'); setMenuOpen(false); }} className="flex w-full rounded-md px-3 py-2.5 text-left text-sm text-white/80 hover:bg-white/5 hover:text-white">Tuna forecasting</button>
                   <button type="button" onClick={() => { onNavigate('harbourBoundary'); setMenuOpen(false); }} className="flex w-full rounded-md px-3 py-2.5 text-left text-sm text-white/80 hover:bg-white/5 hover:text-white">Harbour boundary navigator</button>
                 </div>
 

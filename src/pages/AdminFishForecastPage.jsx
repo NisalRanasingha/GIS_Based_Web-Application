@@ -87,7 +87,7 @@ export default function AdminFishForecastPage({ currentUser, onNavigate, onLogou
     <main className="admin-forecast-shell admin-page-shell">
       <AdminSidebar activePage="adminFishForecast" currentUser={currentUser} onNavigate={onNavigate} onLogout={onLogout} />
       <section className="admin-forecast-main">
-        <header className="admin-forecast-header"><div><p>Decision support / Data studio</p><h1>Publish fish forecast areas</h1><span>Upload a polygon shapefile for each species to publish its fishing areas.</span></div><div className="admin-forecast-header-actions"><button type="button" className="admin-logout-top" onClick={onLogout}>Sign out</button><a href="/services/fish-forecast" target="_blank" rel="noreferrer">View public map ↗</a></div></header>
+        <header className="admin-forecast-header"><div><p>Decision support / Data studio</p><h1>Publish tuna forecast areas</h1><span>Upload a polygon shapefile for each species to publish its fishing areas.</span></div><div className="admin-forecast-header-actions"><button type="button" className="admin-logout-top" onClick={onLogout}>Sign out</button><a href="/services/fish-forecast" target="_blank" rel="noreferrer">View public map ↗</a></div></header>
         <div className="admin-forecast-grid">
           <form className="admin-forecast-form" onSubmit={handleAdd}>
             <div className="admin-form-section"><label>1. Fish species<select value={species} onChange={(event) => handleSpeciesChange(event.target.value)}>{Object.entries(fishSpecies).map(([key, item]) => <option value={key} key={key}>{item.label}</option>)}</select></label><p>{fishSpecies[species].description}</p></div>

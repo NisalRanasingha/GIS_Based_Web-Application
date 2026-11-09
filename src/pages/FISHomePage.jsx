@@ -13,7 +13,7 @@ const libraryUrl = 'http://www.nara.ac.lk/?page_id=3373';
 const rightToInformationUrl = 'http://www.nara.ac.lk/?page_id=20339';
 const naraNewsUrl = 'http://www.nara.ac.lk/?page_id=20299';
 const services = [
-  { image: '/services/TF_8K.png', title: 'Fish Forecasting', text: 'Explore daily marine conditions and habitat suitability maps to support safer fishing decisions.', page: 'fishForecast' },
+  { image: '/services/TF_8K.png', title: 'Tuna Forecasting', text: 'Explore daily marine conditions and habitat suitability maps to support safer fishing decisions.', page: 'fishForecast' },
   { image: '/services/Oceanographic.jpg', title: 'Harbour Boundary Mapping', text: 'View mapped harbour boundaries and coastal locations through the interactive GIS map.', page: 'harbourBoundary' },
   { image: '/services/Adam\'s Bridge Marine National Park.jpg', title: 'Marine Protected Areas', text: 'Discover Sri Lanka’s marine parks, sanctuaries, conservation areas, and mapped locations.', page: 'marineProtectedAreas' },
   { image: '/services/Sri Lanka Tuna Fishing Forecast Map.png', title: 'Weekly Forecast Summary', text: 'Review the weekly marine forecast summary for planning fishing activity across Sri Lanka.', page: 'weeklySummary' },
@@ -66,26 +66,11 @@ const stats = [
   { value: '48', label: 'Research Publications (2024)' },
 ];
 
-const heroSlides = [
-  {
-    image: 'https://images.unsplash.com/photo-1507296993015-167a20c29988?auto=format&fit=crop&w=1800&q=80',
-    eyebrow: 'Fisheries Information Center · NARA',
-    title: 'Ocean Data & Research at Your Fingertips',
-    description: 'Access real-time oceanographic data, fish stock assessments, and coastal resource mapping.',
-  },
-  {
-    image: '/services/slide1.png',
-    eyebrow: 'Marine Monitoring',
-    title: 'Live Coastal Intelligence for Safer Fishing',
-    description: 'Track ocean conditions, fishing advisories, and seasonal patterns to support sustainable decisions.',
-  },
-  {
-    image: '/services/slide2.png',
-    eyebrow: 'Sustainable Growth',
-    title: 'Research, Policy & Community Support',
-    description: 'Promote responsible fishing, aquaculture expansion, and resilient coastal livelihoods across the island.',
-  },
-];
+const heroSlide = {
+  eyebrow: 'Fisheries Information Center · NARA',
+  title: 'Ocean Data & Research at Your Fingertips',
+  description: 'Access real-time oceanographic data, fish stock assessments, and coastal resource mapping.',
+};
 
 const HomeBoundaryViewport = ({ bounds }) => {
   const map = useMap();
@@ -134,21 +119,12 @@ function HarbourMapPreview() {
 }
 
 export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
-  const [activeSlide, setActiveSlide] = useState(0);
   const [newsItems, setNewsItems] = useState([]);
   const [newsLoading, setNewsLoading] = useState(true);
   const [selectedMarineLocation, setSelectedMarineLocation] = useState(marineLocations[0].id);
   const [marineData, setMarineData] = useState(null);
   const [marineError, setMarineError] = useState('');
   const [forecastMaps, setForecastMaps] = useState([]);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setActiveSlide((current) => (current + 1) % heroSlides.length);
-    }, 4500);
-
-    return () => clearInterval(intervalId);
-  }, []);
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/fish-forecasts?species=yellowfin`)
@@ -206,7 +182,7 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
   }, []);
 
   const currentMarineLocation = marineLocations.find(({ id }) => id === selectedMarineLocation) || marineLocations[0];
-  const currentSlide = heroSlides[activeSlide];
+  const currentSlide = heroSlide;
 
   return (
     <div className="nara-responsive min-h-screen bg-[#edf3f7] text-[#123d7b]">
@@ -214,15 +190,7 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
 
       <main>
         <section className="relative h-auto min-h-[calc(100dvh-68px)] w-full overflow-visible bg-[#0a3d72] max-[375px]:min-h-[calc(100dvh-64px)] sm:h-[calc(100dvh-148px)] sm:overflow-hidden">
-          {heroSlides.map((slide, index) => (
-            <div
-              key={slide.title}
-              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${
-                index === activeSlide ? 'opacity-100' : 'opacity-0'
-              }`}
-              style={{ backgroundImage: `url('${slide.image}')` }}
-            />
-          ))}
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/services/fb1.jpg')" }} />
           <div className="absolute inset-0 bg-gradient-to-b from-[#061d3d]/90 via-[#061d3d]/55 to-[#061d3d]/88 sm:bg-gradient-to-r sm:from-[#061d3d]/90 sm:via-[#061d3d]/72 sm:to-[#061d3d]/40" />
           <ScrollDownPrompt />
 
@@ -241,19 +209,6 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
                   <button onClick={() => onNavigate('contact')} className="rounded-md border border-white/40 bg-white/10 px-3 py-3 text-sm font-normal text-white transition hover:bg-white/15 sm:rounded-sm sm:px-5 sm:py-2.5">Contact Us</button>
                 </div>
 
-                <div className="mt-5 flex items-center gap-2 sm:mt-7">
-                  {heroSlides.map((slide, index) => (
-                    <button
-                      key={slide.title}
-                      type="button"
-                      aria-label={`Go to slide ${index + 1}`}
-                      onClick={() => setActiveSlide(index)}
-                      className={`h-2.5 rounded-full transition-all ${
-                        index === activeSlide ? 'w-10 bg-[#f4b740]' : 'w-2.5 bg-white/40 hover:bg-white/70'
-                      }`}
-                    />
-                  ))}
-                </div>
               </div>
 
               <div className="w-full min-w-0 rounded-2xl border border-white/20 bg-[#163b61]/55 p-2 shadow-2xl shadow-[#061d3d]/30 backdrop-blur-md sm:rounded-[18px] sm:bg-white/8 sm:p-3">

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CircleMarker, GeoJSON, MapContainer, Polyline, Popup, TileLayer, Tooltip, useMap } from 'react-leaflet';
+import { CircleMarker, GeoJSON, MapContainer, Popup, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import yellowfinImage from '../assets/Yellowfin Tuna in Deep Blue Waters.png';
 import bigeyeImage from '../assets/Bigeye Tuna in Deep Blue Waters.png';
 import skipjackImage from '../assets/Skipjack Tuna in Deep Blue Waters.png';
@@ -298,7 +298,6 @@ export default function FishForecastMap({
   const distanceLabel = route.length > 1 ? 'by sea' : 'estimated';
   const cellCount = shapes.length || hotspots.length;
 
-  const coverage = useMemo(() => Math.round(forecast?.confidence || 82), [forecast]);
   const shapeBounds = useMemo(() => shapes.flatMap((shape) => (
     shape.type === 'point' ? [shape.coordinates] : shape.coordinates.flat()
   )), [shapes]);
@@ -366,8 +365,10 @@ export default function FishForecastMap({
               {Object.keys(harbours).map((name) => <option key={name}>{name}</option>)}
             </select>
           </label>
-          <div className="forecast-map-stat"><span>Model confidence</span><strong>{coverage}%</strong></div>
           <div className="forecast-map-stat"><span>Selected area distance</span><strong>{selectedShape ? `${distance} km ${distanceLabel} · ${cellCount} areas` : `Select an area · ${cellCount} areas`}</strong></div>
+          <button type="button" className="forecast-summary-action forecast-toolbar-summary-action" onClick={() => onNavigate?.('weeklySummary')}>
+            7-day forecast summary
+          </button>
         </div>
       )}
       {!compact && !weeklySummary && forecasts.length > 1 && (
@@ -428,7 +429,6 @@ export default function FishForecastMap({
               <Tooltip direction="top">Selected forecast area</Tooltip>
             </CircleMarker>
           )}
-          {route.length > 1 && !weeklySummary && <Polyline positions={route} pathOptions={{ color: '#123d7b', dashArray: '8 8', weight: 3 }} />}
         </MapContainer>
         {weeklySummary && <div className="forecast-summary-map-label">LAST 7 DAYS SUMMARY MAP</div>}
       </div>
@@ -452,7 +452,7 @@ export default function FishForecastMap({
           </div>
         </section>
       )}
-      {!compact && !weeklySummary && <p className="forecast-map-note">{shapeError ? `Forecast shape layers could not be loaded: ${shapeError}` : 'Red polygons show forecast fishing areas. Select a harbour from the list or its blue map marker, then select an area to see the shortest sea route. Always confirm sea conditions before departure.'}</p>}
+      {!compact && !weeklySummary && <p className="forecast-map-note">{shapeError ? `Forecast shape layers could not be loaded: ${shapeError}` : 'Red polygons show forecast fishing areas. Select a harbour from the list or its blue map marker, then select an area to see the estimated distance. Always confirm sea conditions before departure.'}</p>}
     </div>
   );
 }

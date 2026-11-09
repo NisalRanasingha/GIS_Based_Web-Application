@@ -53,10 +53,22 @@ export default function FISFooter({ onNavigate }) {
         <div>
           <h3 className="border-b border-white/10 pb-3 text-xl font-bold text-white">Contact Us</h3>
           <div className="mt-4 space-y-3 text-[13px] leading-7 text-white/70">
-            <div className="flex gap-2"><span>📍</span><span>NARA, Crow Island, Mattakkuliya, Colombo 15, Sri Lanka</span></div>
-            <div className="flex gap-2"><span>📞</span><span>+94 11 2522 189 · Fax: +94 11 2521 932</span></div>
-            <div className="flex gap-2"><span>✉️</span><span>fis@nara.ac.lk</span></div>
-            <div className="flex gap-2"><span>🕒</span><span>Monday – Friday: 8:30 AM – 4:30 PM</span></div>
+            <div className="flex gap-2">
+              <img src="/services/location-pin-svgrepo-com.svg" alt="" aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 brightness-0 invert" />
+              <span>NARA, Crow Island, Mattakkuliya, Colombo 15, Sri Lanka</span>
+            </div>
+            <div className="flex gap-2">
+              <img src="/services/phone-call-svgrepo-com.svg" alt="" aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 brightness-0 invert" />
+              <a href="tel:0112520193" className="transition hover:text-white">0112 520 193</a>
+            </div>
+            <div className="flex gap-2">
+              <img src="/services/mail-bookmark-svgrepo-com.svg" alt="" aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 brightness-0 invert" />
+              <a href="mailto:tuna.forecast@gmail.com" className="transition hover:text-white">tuna.forecast@gmail.com</a>
+            </div>
+            <div className="flex gap-2">
+              <img src="/services/clock-circle-svgrepo-com.svg" alt="" aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 brightness-0 invert" />
+              <span>Monday – Friday: 8:30 AM – 4:30 PM</span>
+            </div>
           </div>
           <button onClick={() => onNavigate('contact')} className="mt-5 rounded-sm bg-[#f4b740] px-5 py-3 text-sm font-bold text-[#0a3d72] transition hover:bg-[#e7a330]">
             Contact Us →

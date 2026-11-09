@@ -29,6 +29,65 @@ img { max-width: 100%; display: block; }
 #root { min-height: 100vh; }
 .app-shell { min-height: 100vh; }
 
+.header-utilities {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.header-utility-button {
+  display: inline-flex;
+  min-width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(13, 59, 124, .2);
+  border-radius: 5px;
+  background: #edf4fa;
+  color: #0d3b7c;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  transition: background .2s ease, color .2s ease;
+}
+
+.header-utility-button:hover,
+.header-utility-button:focus-visible {
+  background: #d9e8f4;
+  outline: 2px solid #f4b740;
+  outline-offset: 1px;
+}
+
+.header-utility-button img { width: 20px; height: 20px; object-fit: contain; }
+
+@media (max-width: 767px) {
+  .header-main-row { position: relative; flex-wrap: wrap; }
+  .header-utilities {
+    order: 3;
+    flex-basis: 100%;
+    width: 100%;
+    height: 34px;
+    justify-content: space-around;
+    gap: 0;
+    margin: 2px -4px -2px;
+    border-top: 1px solid rgba(13, 59, 124, .12);
+    background: #edf4fa;
+  }
+  .header-utility-button {
+    flex: 1;
+    min-width: 0;
+    height: 30px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    font-size: 13px;
+  }
+  .header-utility-button img { width: 18px; height: 18px; }
+  .header-menu-toggle { margin-left: auto; }
+}
+
 .fics-page-banner {
   position: relative;
   padding: 28px 0 32px;
