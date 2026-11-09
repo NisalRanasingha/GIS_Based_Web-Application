@@ -205,7 +205,7 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
                   {currentSlide.description}
                 </p>
                 <div className="mt-5 grid max-w-[410px] grid-cols-2 gap-2.5 sm:mt-6 sm:flex sm:max-w-none sm:gap-4">
-                  <button className="rounded-md bg-[#f4b740] px-3 py-3 text-sm font-semibold text-[#0a3d72] shadow-lg shadow-[#f4b740]/20 transition hover:bg-[#e7a330] sm:rounded-sm sm:px-5 sm:py-2.5">View Data Portal</button>
+                  <button type="button" onClick={() => onNavigate('fishForecast')} className="rounded-md bg-[#f4b740] px-3 py-3 text-sm font-semibold text-[#0a3d72] shadow-lg shadow-[#f4b740]/20 transition hover:bg-[#e7a330] sm:rounded-sm sm:px-5 sm:py-2.5">Tuna Forecasting</button>
                   <button onClick={() => onNavigate('contact')} className="rounded-md border border-white/40 bg-white/10 px-3 py-3 text-sm font-normal text-white transition hover:bg-white/15 sm:rounded-sm sm:px-5 sm:py-2.5">Contact Us</button>
                 </div>
 
