@@ -4,7 +4,7 @@ import FISHeader from '../components/FISHeader';
 import FISFooter from '../components/FISFooter';
 import FishForecastMap from '../components/FishForecastMap';
 import ScrollDownPrompt from '../components/ScrollDownPrompt';
-import { getNewsImageUrl, handleNewsImageError } from '../utils/newsImage';
+import { DEFAULT_NEWS_IMAGE, getNewsImageUrl } from '../utils/newsImage';
 import fishingActPdf from '../assets/logo/02-2016_E_1784552773.pdf';
 import 'leaflet/dist/leaflet.css';
 
@@ -76,24 +76,9 @@ const heroSlide = {
 const HomeBoundaryViewport = ({ bounds }) => {
   const map = useMap();
   useEffect(() => {
-    if (bounds.length > 1) map.fitBounds(bounds, { padding: [24, 24] });
+    if (bounds.length > 1) map.fitBounds(bounds, { padding: [18, 18] });
   }, [bounds, map]);
   return null;
-};
-
-const getGeoJsonBounds = (geoJson) => {
-  const coordinates = [];
-  const collectCoordinates = (value) => {
-    if (!Array.isArray(value)) return;
-    if (value.length >= 2 && value.every((item) => typeof item === 'number')) {
-      const [longitude, latitude] = value;
-      if (Number.isFinite(latitude) && Number.isFinite(longitude)) coordinates.push([latitude, longitude]);
-      return;
-    }
-    value.forEach(collectCoordinates);
-  };
-  collectCoordinates(geoJson?.features?.map((feature) => feature.geometry?.coordinates) || geoJson?.geometry?.coordinates);
-  return coordinates;
 };
 
 function HarbourMapPreview() {
@@ -158,15 +143,10 @@ function HarbourMapPreview() {
   const locationPoints = locations
     .map((location) => [Number(location.latitude), Number(location.longitude)])
     .filter(([lat, lng]) => Number.isFinite(lat) && Number.isFinite(lng));
-  const bounds = [
-    ...getGeoJsonBounds(marineBoundaryData),
-    ...getGeoJsonBounds(marineZone),
-    ...boundaryPaths.flatMap(({ coordinates }) => coordinates),
-    ...locationPoints,
-  ];
+  const bounds = [...boundaryPaths.flatMap(({ coordinates }) => coordinates), ...locationPoints];
 
   return (
-    <div className="relative z-0 isolate h-[336px] overflow-hidden border-b-4 border-[#0b568d] bg-[#dcecf2]" aria-label="Current harbour boundary navigator map">
+    <div className="relative z-0 isolate h-[210px] overflow-hidden border-b-4 border-[#0b568d] bg-[#dcecf2]" aria-label="Current harbour boundary navigator map">
       <MapContainer center={[6.93, 79.84]} zoom={12} scrollWheelZoom={false} className="h-full w-full">
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <HomeBoundaryViewport bounds={bounds} />
@@ -443,7 +423,7 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
               {newsLoading && <div className="border border-[#c4d3dd] bg-white p-8 text-center text-slate-500">Loading the latest updates...</div>}
               {!newsLoading && newsItems.length === 0 && <div className="border border-[#c4d3dd] bg-white p-8 text-center text-slate-500">No news updates have been published yet.</div>}
               <div className="space-y-3">
-                {newsItems.map((item, index) => {
+                {newsItems.map((item) => {
                   const publishedDate = new Date(item.published_at);
                   return (
                   <article
@@ -452,10 +432,13 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
                   >
                     <div className="h-20 w-20 shrink-0 overflow-hidden bg-[#0d3b7c] sm:h-24 sm:w-28">
                       <img
-                        src={getNewsImageUrl(item.image_url, index)}
+                        src={getNewsImageUrl(item.image_url)}
                         alt=""
                         className="h-full w-full object-cover"
-                        onError={(event) => handleNewsImageError(event, item.image_url, index)}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = DEFAULT_NEWS_IMAGE;
+                        }}
                       />
                     </div>
 

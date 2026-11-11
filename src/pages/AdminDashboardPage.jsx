@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import './AdminDashboardPage.css';
-import { getNewsImageUrl, handleNewsImageError } from '../utils/newsImage';
+import { getNewsImageUrl } from '../utils/newsImage';
 import { apiFetch } from '../utils/api';
 import AdminSidebar from '../components/AdminSidebar';
 
@@ -126,7 +126,7 @@ export default function AdminDashboardPage({ currentUser, onNavigate, onLogout, 
 
         <section className="dashboard-panel publications-panel">
           <div className="dashboard-panel-heading"><div><span>Content studio</span><h2>Latest publications</h2></div><a href="/admin/news">Manage library <b>→</b></a></div>
-          {recentNews.length === 0 ? <div className="dashboard-empty">No news updates have been published yet.</div> : <div className="dashboard-publications">{recentNews.map((item) => <a href="/admin/news" className="dashboard-publication" key={item.id}><div className="publication-image">{item.image_url ? <img src={getNewsImageUrl(item.image_url)} alt="" onError={(event) => handleNewsImageError(event, item.image_url)} /> : '✦'}</div><div><span>{item.category} · {formatDate(item.published_at)}</span><h3>{item.title}</h3><p>{item.content}</p></div></a>)}</div>}
+          {recentNews.length === 0 ? <div className="dashboard-empty">No news updates have been published yet.</div> : <div className="dashboard-publications">{recentNews.map((item) => <a href="/admin/news" className="dashboard-publication" key={item.id}><div className="publication-image">{item.image_url ? <img src={getNewsImageUrl(item.image_url)} alt="" /> : '✦'}</div><div><span>{item.category} · {formatDate(item.published_at)}</span><h3>{item.title}</h3><p>{item.content}</p></div></a>)}</div>}
         </section>
         <section className="dashboard-panel admin-users-panel">
           <div className="dashboard-panel-heading"><div><span>Account administration</span><h2>User and admin data management</h2></div><span>{users.length} accounts</span></div>
