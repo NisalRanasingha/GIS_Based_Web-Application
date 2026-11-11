@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MapContainer, Polygon, TileLayer, useMap } from 'react-leaflet';
+import { GeoJSON, MapContainer, Polygon, CircleMarker, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import FISHeader from '../components/FISHeader';
 import FISFooter from '../components/FISFooter';
 import FishForecastMap from '../components/FishForecastMap';
@@ -12,6 +12,7 @@ const vesselManagementUrl = 'https://fisheriesdept.gov.lk/regulations/';
 const libraryUrl = 'http://www.nara.ac.lk/?page_id=3373';
 const rightToInformationUrl = 'http://www.nara.ac.lk/?page_id=20339';
 const naraNewsUrl = 'http://www.nara.ac.lk/?page_id=20299';
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const services = [
   { image: '/services/TF_8K.png', title: 'Tuna Forecasting', text: 'Explore daily marine conditions and habitat suitability maps to support safer fishing decisions.', page: 'fishForecast' },
   { image: '/services/Oceanographic.jpg', title: 'Harbour Boundary Mapping', text: 'View mapped harbour boundaries and coastal locations through the interactive GIS map.', page: 'harbourBoundary' },
@@ -81,13 +82,44 @@ const HomeBoundaryViewport = ({ bounds }) => {
 };
 
 function HarbourMapPreview() {
+  const [locations, setLocations] = useState([]);
   const [boundaries, setBoundaries] = useState([]);
+  const [marineZone, setMarineZone] = useState(null);
+  const [marineBoundaryData, setMarineBoundaryData] = useState(null);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/harbour-boundaries`)
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error('Boundary service unavailable.')))
-      .then((result) => setBoundaries(result.boundaries || []))
-      .catch(() => setBoundaries([]));
+    let active = true;
+    const fetchJson = (url, message) => fetch(url).then((response) => {
+      if (!response.ok) throw new Error(message);
+      return response.json();
+    });
+
+    Promise.allSettled([
+      fetchJson(`${apiUrl}/api/harbour-boundaries`, 'Harbour boundary service unavailable.'),
+      fetchJson(`${apiUrl}/api/marine-boundaries`, 'Marine boundary service unavailable.'),
+    ]).then(([harbourResult, marineResult]) => {
+      if (!active) return;
+      const failures = [];
+      if (harbourResult.status === 'fulfilled') {
+        setLocations(harbourResult.value.locations || []);
+        setBoundaries(harbourResult.value.boundaries || []);
+      } else {
+        failures.push(harbourResult.reason.message);
+      }
+      if (marineResult.status === 'fulfilled') {
+        setMarineZone(marineResult.value.zone || null);
+        setMarineBoundaryData(marineResult.value.boundaries || null);
+      } else {
+        failures.push(marineResult.reason.message);
+      }
+      setError(failures.join(' '));
+    }).finally(() => {
+      if (active) setIsLoading(false);
+    });
+
+    return () => { active = false; };
   }, []);
 
   const boundaryPaths = boundaries.flatMap((boundary) => {
@@ -100,20 +132,45 @@ function HarbourMapPreview() {
       }
     }
     return Array.isArray(coordinates) && coordinates.every((point) => Array.isArray(point) && point.length >= 2)
-      ? [{ coordinates: coordinates.map(([lat, lng]) => [Number(lat), Number(lng)]), color: boundary.color || '#3388ff' }]
+      ? [{
+        coordinates: coordinates
+          .map(([lat, lng]) => [Number(lat), Number(lng)])
+          .filter(([lat, lng]) => Number.isFinite(lat) && Number.isFinite(lng)),
+        color: boundary.color || '#3388ff',
+      }]
       : [];
-  });
-  const bounds = boundaryPaths.flatMap(({ coordinates }) => coordinates);
+  }).filter(({ coordinates }) => coordinates.length > 1);
+  const locationPoints = locations
+    .map((location) => [Number(location.latitude), Number(location.longitude)])
+    .filter(([lat, lng]) => Number.isFinite(lat) && Number.isFinite(lng));
+  const bounds = [...boundaryPaths.flatMap(({ coordinates }) => coordinates), ...locationPoints];
 
   return (
-    <div className="relative z-0 isolate h-[210px] overflow-hidden border-b-4 border-[#0b568d] bg-[#dcecf2]">
+    <div className="relative z-0 isolate h-[210px] overflow-hidden border-b-4 border-[#0b568d] bg-[#dcecf2]" aria-label="Current harbour boundary navigator map">
       <MapContainer center={[6.93, 79.84]} zoom={12} scrollWheelZoom={false} className="h-full w-full">
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <HomeBoundaryViewport bounds={bounds} />
+        {marineZone && (
+          <GeoJSON data={marineZone} style={{ color: '#007da0', fillColor: '#00B3DC', fillOpacity: 0.18, weight: 2 }} />
+        )}
+        {marineBoundaryData && (
+          <GeoJSON data={marineBoundaryData} style={{ color: '#173c4b', weight: 3, opacity: 1 }} />
+        )}
         {boundaryPaths.map(({ coordinates, color }, index) => (
           <Polygon key={`${color}-${index}`} positions={coordinates} pathOptions={{ color, fillColor: color, fillOpacity: 0.25, weight: 4 }} />
         ))}
+        {locations.map((location) => {
+          const position = [Number(location.latitude), Number(location.longitude)];
+          if (!Number.isFinite(position[0]) || !Number.isFinite(position[1])) return null;
+          return (
+            <CircleMarker key={location.id} center={position} radius={5} pathOptions={{ color: '#fff', weight: 2, fillColor: '#087bc4', fillOpacity: 1 }}>
+              <Tooltip direction="top">{location.name}</Tooltip>
+            </CircleMarker>
+          );
+        })}
       </MapContainer>
+      {isLoading && <div className="pointer-events-none absolute inset-0 z-[400] grid place-items-center bg-white/65 text-xs font-semibold text-[#124a78]">Loading current map…</div>}
+      {!isLoading && error && <div className="absolute bottom-2 left-2 right-2 z-[400] bg-white/90 px-2 py-1 text-[10px] text-[#7b4e00]">{error}</div>}
     </div>
   );
 }
