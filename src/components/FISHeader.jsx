@@ -78,7 +78,7 @@ export default function FISHeader({ page, onNavigate, currentUser, onLogout }) {
             <div className="min-w-0 -translate-y-1 self-center">
               <div className="whitespace-nowrap text-[6px] font-semibold tracking-[0.04em] text-[#0a3d72] sm:text-[8px] sm:tracking-[0.06em] lg:text-[0.7rem]">National Aquatic Resources Research and Development Agency</div>
               <div className="mt-0 text-[12px] font-medium leading-tight text-[#103d7a] sm:mt-0.5 sm:text-base lg:text-[1.45rem]">
-                FISHERIES INFORMATION CENTER - FIS
+                FISHERIES INFORMATION SERVICE - FIS
               </div>
             </div>
           </div>
