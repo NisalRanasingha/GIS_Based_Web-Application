@@ -837,6 +837,15 @@ img { max-width: 100%; display: block; }
   color: #57718a;
 }
 
+.marine-forecast-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.marine-forecast-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 .news-body {
   display: flex;
   align-items: center;

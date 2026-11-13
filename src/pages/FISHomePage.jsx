@@ -275,11 +275,11 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
                     <span className={`rounded-full px-2 py-0.5 text-[8px] sm:py-1 sm:text-[9px] ${marineError ? 'bg-red-400/20 text-red-200' : 'bg-emerald-400/20 text-emerald-200'}`}>{marineError ? 'Unavailable' : 'Online'}</span>
                   </div>
                   <label className="mb-3 block text-[9px] font-bold uppercase tracking-[0.1em] text-white sm:mb-3 sm:text-[10px]">
-                   <span className="mb-3 block text-[9px] font-bold uppercase tracking-[0.1em] text-white sm:mb-3 sm:text-[10px]"> Monitoring location</span>
+                    <span className="mb-2 block">Monitoring location</span>
                     <select
                       value={selectedMarineLocation}
                       onChange={(event) => setSelectedMarineLocation(event.target.value)}
-                      className="mt-1.5 block w-full rounded border border-white/20 bg-[#123456]/80 px-2 py-1.5 text-xs normal-case tracking-normal text-white outline-none transition focus:border-[#f4b740]"
+                      className="block w-full rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-xs normal-case tracking-normal text-white outline-none backdrop-blur transition hover:border-white/30 focus:border-[#f4b740] focus:ring-2 focus:ring-[#f4b740]/25"
                       aria-label="Select marine monitoring location"
                     >
                       {marineLocations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
@@ -304,15 +304,18 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
                       <div className="text-[9px] uppercase tracking-[0.1em] text-white/60 sm:text-[10px] sm:tracking-[0.12em]">Latest bulletin</div>
                       <div className="mt-1 text-xs leading-4 text-white/85 sm:mt-2 sm:text-sm sm:leading-normal">{marineError || (marineData ? `${currentMarineLocation.name} coastal waters are reporting ${formatMarineNumber(marineData.waveHeight, ' m')} waves from the ${formatWaveDirection(marineData.waveDirection).split(' (')[0]} with a ${formatMarineNumber(marineData.wavePeriod, ' second')} period.` : 'Marine conditions are being retrieved automatically.')}</div>
                     </div>
-                    <div className="rounded-md border border-white/10 bg-[#081f3f]/50 p-2 sm:p-2.5">
-                      <div className="mb-2 text-[9px] font-bold uppercase tracking-[0.1em] text-white sm:text-[10px]">7-day forecast</div>
-                      <div className="flex max-w-full gap-1.5 overflow-x-auto pb-1">
+                    <div className="rounded-xl border border-white/10 bg-[#061d3d]/45 p-2.5 shadow-inner sm:p-3">
+                      <div className="mb-2.5 flex items-center justify-between gap-3">
+                        <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-white sm:text-[10px]">7-day forecast</div>
+                        <span className="text-[9px] text-white/45">Swipe to explore</span>
+                      </div>
+                      <div className="marine-forecast-scroll flex max-w-full snap-x snap-mandatory gap-2 overflow-x-auto pb-1">
                         {(marineData?.forecast || []).map((day) => (
-                          <div key={day.date} className="min-w-[58px] flex-1 rounded border border-white/10 bg-white/10 px-1.5 py-2 text-center max-[420px]:flex-none">
-                            <div className="text-[9px] font-semibold text-white/75">{formatForecastDate(day.date)}</div>
-                            <div className="mt-1 text-xs font-bold text-white">{formatMarineNumber(day.waveHeight, ' m')}</div>
-                            <div className="mt-0.5 text-[9px] text-white/70">{formatWaveDirection(day.waveDirection).split(' (')[0]}</div>
-                            <div className="mt-0.5 text-[9px] text-white/60">{formatMarineNumber(day.wavePeriod, ' s')}</div>
+                          <div key={day.date} className="min-w-[70px] flex-1 snap-start rounded-lg border border-white/10 bg-white/[0.08] px-2 py-2.5 text-center transition hover:border-[#f4b740]/50 hover:bg-white/[0.14] max-[420px]:flex-none">
+                            <div className="text-[9px] font-semibold text-white/70">{formatForecastDate(day.date)}</div>
+                            <div className="mt-1.5 text-sm font-bold text-white">{formatMarineNumber(day.waveHeight, ' m')}</div>
+                            <div className="mt-1 text-[9px] font-semibold text-[#f4b740]">{formatWaveDirection(day.waveDirection).split(' (')[0]}</div>
+                            <div className="mt-1 text-[9px] text-white/55">{formatMarineNumber(day.wavePeriod, ' s')} period</div>
                           </div>
                         ))}
                         {!marineData?.forecast?.length && <div className="text-xs text-white/70">Forecast data is being retrieved automatically.</div>}
