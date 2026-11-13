@@ -229,6 +229,45 @@ app.get('/api/health', async (_req, res) => {
   res.json({ success: true, message: 'Backend is running' });
 });
 
+app.get('/api/news-image/:fileId', async (req, res, next) => {
+  try {
+    const fileId = String(req.params.fileId || '');
+    if (!/^[a-zA-Z0-9_-]{10,}$/.test(fileId)) {
+      return res.status(400).json({ success: false, message: 'Invalid image identifier.' });
+    }
+
+    const resourceKey = typeof req.query.resourcekey === 'string'
+      ? req.query.resourcekey.trim()
+      : '';
+    if (resourceKey && !/^[a-zA-Z0-9_-]+$/.test(resourceKey)) {
+      return res.status(400).json({ success: false, message: 'Invalid image resource key.' });
+    }
+    const resourceKeyQuery = resourceKey ? `&resourcekey=${encodeURIComponent(resourceKey)}` : '';
+    const imageUrls = [
+      `https://drive.usercontent.google.com/download?id=${encodeURIComponent(fileId)}&export=view${resourceKeyQuery}`,
+      `https://drive.google.com/thumbnail?id=${encodeURIComponent(fileId)}&sz=w1600${resourceKeyQuery}`
+    ];
+
+    for (const imageUrl of imageUrls) {
+      const imageResponse = await fetch(imageUrl);
+      const contentType = imageResponse.headers.get('content-type') || '';
+      if (imageResponse.ok && contentType.startsWith('image/')) {
+        const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+        res.set({
+          'Cache-Control': 'public, max-age=3600',
+          'Content-Type': contentType,
+          'Content-Length': imageBuffer.length
+        });
+        return res.end(imageBuffer);
+      }
+    }
+
+    return res.status(404).json({ success: false, message: 'The Google Drive image could not be loaded.' });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 app.get('/api/marine-boundaries', async (_req, res, next) => {
   try {
     const boundaryQuery = new URLSearchParams({

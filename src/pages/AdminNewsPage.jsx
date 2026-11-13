@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import './AdminNewsPage.css';
-import { getNewsImageUrl } from '../utils/newsImage';
+import { DEFAULT_NEWS_IMAGE, getNewsImageUrls } from '../utils/newsImage';
 import { apiFetch } from '../utils/api';
 import AdminSidebar from '../components/AdminSidebar';
 
@@ -60,6 +60,6 @@ export default function AdminNewsPage({ currentUser, onNavigate, onLogout }) {
       <label>News content<textarea name="content" value={form.content} onChange={updateForm} required minLength="10" maxLength="5000" rows="7" placeholder="Share the essential details..." /></label>
       <button className="publish-button" type="submit">{editingId ? 'Save changes' : 'Publish update'} <span aria-hidden="true">→</span></button>
     </form>
-    <section className="news-list-panel"><div className="list-heading"><div><span>Published library</span><h2>{news.length} updates</h2></div></div>{isLoading ? <p className="news-empty">Loading publications...</p> : news.length === 0 ? <p className="news-empty">No publications yet. Add the first update.</p> : <div className="news-admin-list">{news.map((item) => <article className="news-admin-item" key={item.id}><div className="news-thumb">{item.image_url ? <img src={getNewsImageUrl(item.image_url)} alt="" /> : <span>✦</span>}</div><div className="news-admin-copy"><span>{item.category} · {formatDate(item.published_at)}</span><h3>{item.title}</h3><p>{item.content}</p><div><button type="button" onClick={() => editNews(item)}>Edit</button><button type="button" className="danger" onClick={() => deleteNews(item)}>Delete</button></div></div></article>)}</div>}</section></div>
+    <section className="news-list-panel"><div className="list-heading"><div><span>Published library</span><h2>{news.length} updates</h2></div></div>{isLoading ? <p className="news-empty">Loading publications...</p> : news.length === 0 ? <p className="news-empty">No publications yet. Add the first update.</p> : <div className="news-admin-list">{news.map((item) => { const imageUrls = getNewsImageUrls(item.image_url); let imageIndex = 0; return <article className="news-admin-item" key={item.id}><div className="news-thumb">{item.image_url ? <img src={imageUrls[imageIndex]} alt="" onError={(event) => { imageIndex += 1; event.currentTarget.onerror = imageIndex < imageUrls.length - 1 ? event.currentTarget.onerror : null; event.currentTarget.src = imageUrls[imageIndex] || DEFAULT_NEWS_IMAGE; }} /> : <span>✦</span>}</div><div className="news-admin-copy"><span>{item.category} · {formatDate(item.published_at)}</span><h3>{item.title}</h3><p>{item.content}</p><div><button type="button" onClick={() => editNews(item)}>Edit</button><button type="button" className="danger" onClick={() => deleteNews(item)}>Delete</button></div></div></article>; })}</div>}</section></div>
   </main></div>;
 }
