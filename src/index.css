@@ -846,6 +846,11 @@ img { max-width: 100%; display: block; }
   display: none;
 }
 
+.marine-location-select option {
+  background: #fff;
+  color: #000;
+}
+
 .news-body {
   display: flex;
   align-items: center;

@@ -279,7 +279,7 @@ export default function FISHomePage({ onNavigate, currentUser, onLogout }) {
                     <select
                       value={selectedMarineLocation}
                       onChange={(event) => setSelectedMarineLocation(event.target.value)}
-                      className="block w-full rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-xs normal-case tracking-normal text-white outline-none backdrop-blur transition hover:border-white/30 focus:border-[#f4b740] focus:ring-2 focus:ring-[#f4b740]/25"
+                      className="marine-location-select block w-full rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-xs normal-case tracking-normal text-white outline-none backdrop-blur transition hover:border-white/30 focus:border-[#f4b740] focus:ring-2 focus:ring-[#f4b740]/25"
                       aria-label="Select marine monitoring location"
                     >
                       {marineLocations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
